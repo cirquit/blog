@@ -1,0 +1,40 @@
+# Site settings
+title:          My Blog
+description:    "A personal blog."
+baseurl:        "/blog"
+url:            "https://cirquit.github.io"
+
+# Author
+author:
+  name:         Your Name
+  url:          ""
+  email:        ""
+
+# Build settings
+markdown:       kramdown
+include:
+  - _pages
+
+# Assets
+sass:
+  sass_dir:     _sass
+  style:        compressed
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-paginate
+  - jekyll-seo-tag
+
+# Permalinks
+permalink:      /:year-:month-:day/:title
+paginate:       5
+
+# Excludes
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - README.md
+  - LICENSE
+  - mise.toml
