@@ -4,9 +4,29 @@
 
   {% seo %}
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Baskerville:400,400i,700">
+  <!-- Preload the font that renders body text -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+        href="{{ "/assets/fonts/libre-baskerville-400.woff2" | relative_url }}">
+
+  <!-- Styles: self-hosted font + theme CSS, inlined to avoid render-blocking requests -->
+  <style>
+    @font-face {
+      font-family: 'Libre Baskerville';
+      font-style: normal; font-weight: 400; font-display: swap;
+      src: url({{ "/assets/fonts/libre-baskerville-400.woff2" | relative_url }}) format('woff2');
+    }
+    @font-face {
+      font-family: 'Libre Baskerville';
+      font-style: italic; font-weight: 400; font-display: swap;
+      src: url({{ "/assets/fonts/libre-baskerville-400italic.woff2" | relative_url }}) format('woff2');
+    }
+    @font-face {
+      font-family: 'Libre Baskerville';
+      font-style: normal; font-weight: 700; font-display: swap;
+      src: url({{ "/assets/fonts/libre-baskerville-700.woff2" | relative_url }}) format('woff2');
+    }
+    {{ "@import 'tale';" | scssify }}
+  </style>
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="{{ "/assets/favicon-32x32.png" | relative_url }}">
