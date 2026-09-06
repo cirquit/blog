@@ -1,39 +1,42 @@
-# Site settings
-title:          My Blog
-description:    "A personal blog."
-baseurl:        "/blog"
-url:            "https://cirquit.github.io"
-
-# Author
+# ─────────────────────────────────────────────────────────────
+#  SITE IDENTITY  —  edit these 4, then rebuild
+# ─────────────────────────────────────────────────────────────
+title:          My Blog                       # TODO: your blog's name (shown in the header + browser tab)
+description:    "A personal blog."             # TODO: one line, used in SEO tags + the RSS feed
 author:
-  name:         Your Name
-  url:          ""
-  email:        ""
+  name:         Your Name                      # TODO: shown under every post as "Written by ..."
+  email:        ""                             #       optional; leave "" to omit
+  url:          ""                             #       optional; your homepage, leave "" to omit
 
-# Build settings
+# ─────────────────────────────────────────────────────────────
+#  WHERE THE SITE LIVES  —  edit when you publish / add a domain
+# ─────────────────────────────────────────────────────────────
+url:            "https://cirquit.github.io"    # scheme + host, no trailing slash
+baseurl:        "/blog"                        # subpath. "/blog" for cirquit.github.io/blog
+                                               # set to "" once a custom domain points at the site
+
+# ─────────────────────────────────────────────────────────────
+#  BUILD  —  you will rarely touch anything below
+# ─────────────────────────────────────────────────────────────
 markdown:       kramdown
+permalink:      /:year-:month-:day/:title      # post URL shape, e.g. /2026-09-06/hello
+paginate:       5                              # posts per page on the home page
+
 include:
   - _pages
 
-# Assets
+plugins:
+  - jekyll-feed                                # generates /feed.xml
+  - jekyll-paginate                            # home-page pagination
+  - jekyll-seo-tag                             # <title>, OpenGraph, JSON-LD
+
 sass:
   sass_dir:     _sass
   style:        compressed
-  quiet_deps:   true
+  quiet_deps:   true                           # hush warnings from the vendored theme
   silence_deprecations:
     - import
 
-# Plugins
-plugins:
-  - jekyll-feed
-  - jekyll-paginate
-  - jekyll-seo-tag
-
-# Permalinks
-permalink:      /:year-:month-:day/:title
-paginate:       5
-
-# Excludes
 exclude:
   - Gemfile
   - Gemfile.lock
