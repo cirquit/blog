@@ -19,6 +19,9 @@ include:
 sass:
   sass_dir:     _sass
   style:        compressed
+  quiet_deps:   true
+  silence_deprecations:
+    - import
 
 # Plugins
 plugins:

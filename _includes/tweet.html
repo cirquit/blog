@@ -1,0 +1,15 @@
+{%- comment -%}
+Static citation for a tweet/X post. No JavaScript, no external requests.
+Usage:
+  {% include tweet.html
+     handle="@jack"
+     name="Jack"
+     url="https://x.com/jack/status/20"
+     date="2006-03-21"
+     text="just setting up my twttr" %}
+Only `url` and `text` are required.
+{%- endcomment -%}
+<blockquote class="tweet-cite">
+  <p class="tweet-cite-text">{{ include.text }}</p>
+  <div class="tweet-cite-meta">{% if include.name %}<span class="tweet-cite-name">{{ include.name }}</span> {% endif %}{% if include.handle %}<span class="tweet-cite-handle">{{ include.handle }}</span> {% endif %}{% if include.date %}<time datetime="{{ include.date }}">{{ include.date }}</time> {% endif %}<a href="{{ include.url }}" rel="noopener nofollow">View on X&nbsp;&#8599;</a></div>
+</blockquote>

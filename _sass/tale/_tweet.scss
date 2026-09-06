@@ -1,0 +1,38 @@
+.tweet-cite {
+  margin: 2em 0;
+  padding: 1em 1.25em;
+  border: 1px solid $grey-2;
+  border-left: 3px solid $blue;
+  border-radius: 4px;
+  background: $grey-3;
+
+  .tweet-cite-text {
+    margin: 0 0 .6em;
+    font-style: normal;
+    color: $default-color;
+    white-space: pre-line;
+  }
+
+  .tweet-cite-meta {
+    text-align: left;
+    font-family: $sans-serif;
+    font-size: .8rem;
+    color: $default-tint;
+
+    .tweet-cite-name {
+      font-weight: bold;
+      color: $default-color;
+    }
+
+    time::after {
+      content: '\00b7';
+      margin: 0 .5em;
+      color: $grey-1;
+    }
+
+    a {
+      color: $blue;
+      border: none;
+    }
+  }
+}
