@@ -1,0 +1,26 @@
+---
+layout: default
+title: "Galleries"
+permalink: /galleries/
+---
+
+<div class="post">
+  <h1 class="post-title">Galleries</h1>
+  <div class="post-line"></div>
+
+  <div class="gallery-index-grid">
+    {% assign galleries = site.galleries | sort: 'date' | reverse %}
+    {% for gallery in galleries %}
+      {% assign cover = gallery.photos.first[1] %}
+      {% assign cover_src = cover.basename | prepend: '/' | prepend: site.baseurl %}
+      <a class="gallery-index-item" href="{{ gallery.url | prepend: site.baseurl }}">
+        <picture>
+          <source srcset="{{ cover_src }}-thumb.avif" type="image/avif">
+          <img src="{{ cover_src }}-thumb.webp" alt="{{ gallery.title }}" loading="lazy" decoding="async">
+        </picture>
+        <span class="gallery-index-title">{{ gallery.title }}</span>
+        <time class="gallery-index-date" datetime="{{ gallery.date }}">{{ gallery.date | date: "%B %d, %Y" }}</time>
+      </a>
+    {% endfor %}
+  </div>
+</div>

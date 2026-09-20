@@ -1,28 +1,26 @@
 {%- comment -%}
 Inline photo for a normal post. No JavaScript, no external requests.
 Usage:
-  {% include photo.html
-     src="assets/photos/2026-summer/beach-01"
-     alt="Sunset over the pier"
-     caption="Optional caption text"
-     lightbox=true %}
-`src` and `alt` are required. `caption` is optional. `lightbox: true` makes
-the photo click-to-enlarge (uses the -thumb variant + a full-screen CSS-only
-overlay); the default (no lightbox) renders the -full variant directly,
-sized to the post's content width, which is the right choice for a single
-photo illustrating a post rather than a gallery.
+  {% include photo.html slug="beach-01" lightbox=true %}
+`slug` is required and looks up page.photos[slug] -- a front-matter entry
+on THIS post (basename, alt, note, exif), written by scripts/make-photo.sh
+when you run it against this post's file. The photo doesn't need to be
+part of any gallery; it's tied only to this post.
 
-Run scripts/make-photo.sh locally first to generate the four derivative
-files (-thumb.avif/.webp, -full.avif/.webp) that `src` points at.
+`lightbox: true` makes it click-to-enlarge (thumbnail + full-screen CSS-only
+overlay with EXIF/note); the default renders the full-size derivative
+directly, sized to the post's content width.
 {%- endcomment -%}
 {% if include.lightbox %}
-  {% include photo-lightbox-item.html src=include.src alt=include.alt caption=include.caption %}
+  {% include photo-lightbox-item.html slug=include.slug %}
 {% else %}
+  {%- assign meta = page.photos[include.slug] -%}
+  {%- assign base = meta.basename | prepend: '/' | prepend: site.baseurl -%}
 <figure class="photo-figure">
   <picture>
-    <source srcset="{{ include.src | prepend: '/' | prepend: site.baseurl }}-full.avif" type="image/avif">
-    <img src="{{ include.src | prepend: '/' | prepend: site.baseurl }}-full.webp" alt="{{ include.alt }}" loading="lazy" decoding="async" class="photo-img">
+    <source srcset="{{ base }}-full.avif" type="image/avif">
+    <img src="{{ base }}-full.webp" alt="{{ meta.alt }}" loading="lazy" decoding="async" class="photo-img">
   </picture>
-  {% if include.caption %}<figcaption class="photo-caption">{{ include.caption }}</figcaption>{% endif %}
+  {% if meta.note != "" %}<figcaption class="photo-caption">{{ meta.note }}</figcaption>{% endif %}
 </figure>
 {% endif %}

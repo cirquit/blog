@@ -69,6 +69,7 @@
       padding: 2rem;
       background: rgba(0, 0, 0, .92);
       cursor: zoom-out;
+      overflow-y: auto;
     }
 
     .photo-lightbox-thumb-pic {
@@ -78,23 +79,37 @@
     .photo-lightbox-full {
       display: block;
       max-width: 100%;
-      max-height: 100%;
+      flex-shrink: 0;
 
       .photo-lightbox-full-pic img {
         display: block;
         max-width: 100%;
-        max-height: 85vh;
+        max-height: 70vh;
         margin: 0 auto;
         object-fit: contain;
       }
 
-      .photo-lightbox-caption {
+      .photo-lightbox-meta {
         display: block;
         margin-top: 1rem;
+        max-width: 40rem;
+        text-align: center;
+      }
+
+      .photo-exif {
+        display: block;
+        font-family: $sans-serif;
+        font-size: .75rem;
+        letter-spacing: .02em;
+        color: $default-tint;
+      }
+
+      .photo-note {
+        display: block;
+        margin-top: .4rem;
         font-family: $sans-serif;
         font-size: .85rem;
         color: $white;
-        text-align: center;
       }
     }
   }
@@ -105,5 +120,41 @@
 
   &[open] > .photo-caption {
     display: none;
+  }
+}
+
+.gallery-index-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 2em 0;
+}
+
+.gallery-index-item {
+  display: block;
+  color: $default-color;
+
+  picture,
+  img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .gallery-index-title {
+    display: block;
+    margin-top: .5rem;
+    font-family: $sans-serif;
+    font-weight: 700;
+    color: $default-shade;
+  }
+
+  .gallery-index-date {
+    display: block;
+    font-family: $serif-secondary;
+    font-size: .8rem;
+    color: $default-tint;
   }
 }

@@ -145,50 +145,63 @@ JavaScript, nothing loads from X, and it survives the tweet being deleted.
 
 Unlike text, a photo needs one local step before committing — it never
 happens in CI, and only the small generated files ever enter the repo, never
-the raw camera export:
+the raw camera export. Requires [libvips](https://www.libvips.org/)
+(`brew install vips`) and [exiftool](https://exiftool.org/) (`brew install exiftool`).
+
+**1. Create the gallery or post first**, if it doesn't exist yet — copy
+`_galleries/_template.md` to `_galleries/your-slug.md` (for a standalone
+gallery) or `_drafts/template.md` to `_posts/...` (for a photo tied only to
+one post, no gallery). It needs `---` front-matter fences already in place.
+
+**2. Run the script once per photo**, from the repo root:
 
 ```sh
-scripts/make-photo.sh ~/Pictures/export.jpg assets/photos/2026-summer beach-01
+scripts/make-photo.sh ~/Pictures/export.jpg _galleries/your-slug.md beach-01 "Sunset over the pier"
 ```
 
-Requires [libvips](https://www.libvips.org/) (`brew install vips`). Produces
-four sRGB-normalized, compressed files:
+This generates four sRGB-normalized, compressed files under
+`assets/photos/your-slug/`:
 
 - `beach-01-thumb.avif` / `.webp` — ~600px, for a gallery grid tile (~20-70 KB)
 - `beach-01-full.avif` / `.webp` — ~2560px, for inline display or a lightbox (~100-800 KB)
 
-**Inline in a post:**
-
-```liquid
-{% include photo.html
-   src="assets/photos/2026-summer/beach-01"
-   alt="Sunset over the pier"
-   caption="Optional caption"
-   lightbox=true %}
-```
-
-`src` and `alt` are required. Leave out `lightbox` for a plain photo sized to
-the post; set `lightbox=true` for click-to-enlarge (thumbnail + full-screen
-view — CSS only, no JavaScript).
-
-**A standalone gallery:** add a file to `_galleries/`, e.g. `_galleries/2026-summer.md`:
+...and **auto-fills a `photos.beach-01` entry** in `_galleries/your-slug.md`'s
+front matter — basename, alt text, and real EXIF (camera, lens, aperture,
+shutter, ISO, focal length, date) pulled straight from the source file:
 
 ```yaml
----
-layout: gallery
-title: "Summer 2026"
-date: 2026-07-01
 photos:
-  - basename: assets/photos/2026-summer/beach-01
+  beach-01:
+    basename: assets/photos/your-slug/beach-01
     alt: "Sunset over the pier"
-    caption: "Optional caption"
-  - basename: assets/photos/2026-summer/beach-02
-    alt: "..."
----
+    note: ""                                # flavor text -- yours to write
+    exif:
+      camera: "FUJIFILM X-A3"
+      lens: "XF35mmF2 R WR"
+      aperture: "f/2.0"
+      shutter: "1/1600"
+      iso: 200
+      focal_length: "35.0 mm"
+      captured_at: "2026-07-01 18:42:00"
 ```
 
-Renders at `/galleries/2026-summer/` as a grid; every photo opens full-screen
-on click, no JavaScript.
+**3. Write `note:` by hand** if you want flavor text under the photo —
+re-running the script for the same slug refreshes EXIF but never overwrites
+a `note` you've already written.
+
+A standalone gallery (from `_galleries/your-slug.md`) renders at
+`/galleries/your-slug/` as a grid, listed on `/galleries/`; every photo opens
+full-screen on click (EXIF + note shown underneath), no JavaScript.
+
+**A photo tied only to a post** (no gallery) uses the same `photos:` block,
+just written in that post's own front matter instead, then:
+
+```liquid
+{% include photo.html slug="beach-01" lightbox=true %}
+```
+
+Leave out `lightbox` for a plain photo sized to the post; set
+`lightbox=true` for click-to-enlarge.
 
 ---
 

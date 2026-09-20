@@ -21,15 +21,12 @@ Write the post in Markdown here.
 -->
 
 <!--
-  PHOTO INLINE (optional) — run scripts/make-photo.sh first, see README §5:
+  PHOTO INLINE (optional) — run scripts/make-photo.sh first (adds a
+  `photos.<slug>` entry to THIS post's front matter), see README §5:
 
-  {% include photo.html
-     src="assets/photos/2026-summer/beach-01"
-     alt="Sunset over the pier"
-     caption="Optional caption"
-     lightbox=true %}
+  {% include photo.html slug="beach-01" lightbox=true %}
 
-  `src` and `alt` are required. Drop `lightbox` for a plain sized-to-post photo.
+  Drop `lightbox` for a plain sized-to-post photo.
 -->
 
 <!--

@@ -15,8 +15,9 @@ layout: default
   {{ content }}
 
   <div class="photo-gallery-grid">
-    {% for photo in page.photos %}
-      {% include photo-lightbox-item.html src=photo.basename alt=photo.alt caption=photo.caption %}
+    {% for pair in page.photos %}
+      {% assign photo_slug = pair[0] %}
+      {% include photo-lightbox-item.html slug=photo_slug %}
     {% endfor %}
   </div>
 </div>
