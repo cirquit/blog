@@ -96,14 +96,22 @@ body:has(.gv) {
   border: 0;
   background: none;
   cursor: pointer;
-  z-index: $gv-z + 2;
+  // Strictly above .gv-controls (also $gv-z + 2, later in DOM order) --
+  // they shared a z-index and .gv-controls was winning paint order in
+  // their top-right overlap, silently eating clicks meant for the top of
+  // .gv-nav--next.
+  z-index: $gv-z + 3;
 
   &--prev { left: 0; }
   &--next { right: 0; }
 
+  // Still a visible signal, not nothing -- clicking into a wall with zero
+  // feedback is what "frustratingly click and don't find anything" meant.
+  // Fixed and dim, not proximity-gated, so it reads as "wall here" rather
+  // than "still live, just quiet."
   &[disabled] {
     cursor: default;
-    .gv-tri { opacity: 0 !important; }
+    .gv-tri { opacity: .18 !important; }
   }
 
   &:focus-visible .gv-tri {
