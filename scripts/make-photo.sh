@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Add one photo to a gallery or post: generate its web derivatives AND
-# write/update its metadata (alt, EXIF, empty note) in the target file's
-# front matter. Run this by hand, locally, before committing -- never in CI.
+# write/update its metadata (alt, EXIF, empty note/place/country) in the
+# target file's front matter. Run this by hand, locally, before committing -- never in CI.
 #
 # Usage:
 #   scripts/make-photo.sh <source.jpg> <target.md> <slug> "<alt text>"
@@ -14,8 +14,8 @@
 #   assets/photos/<group>/<slug>-thumb.avif   assets/photos/<group>/<slug>-thumb.webp
 #   assets/photos/<group>/<slug>-full.avif    assets/photos/<group>/<slug>-full.webp
 # and writes/updates photos.<slug> in <target.md>'s front matter with
-# basename, alt, auto-extracted EXIF, and an empty `note` (never
-# overwritten if you've already written one).
+# basename, alt, auto-extracted EXIF, and empty `note`, `place` and `country`
+# fields (none of the three is ever overwritten once you've written a value).
 #
 # Requires libvips (`brew install vips`) and exiftool (`brew install exiftool`).
 # Converts to sRGB explicitly before encoding -- do not "simplify" this to a

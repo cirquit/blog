@@ -1,0 +1,78 @@
+{%- comment -%}
+The gallery viewer: a full-frame stage that shows one photo at a time with
+prev/next navigation, a persistent metadata line, the optional note, and the
+swappable gallery-title component.
+
+Rendered `hidden` and stays hidden unless assets/js/gallery-viewer.js runs --
+the site's ONE deliberate JavaScript exception, because jumping from one
+photo's open state to another's has no pure-CSS mechanism. Without JS the
+gallery grid's existing CSS-only <details> lightbox handles opening a single
+photo, exactly as before; the viewer only adds cross-photo navigation, the
+crossfade, the title reveal and the settings checkbox on top.
+
+Reads page.photos (basename / alt / note / place / country / exif) and
+page.title_style. Everything per-photo the script needs is baked into data-
+attributes at build time, so the script itself stays tiny and does no
+formatting.
+{%- endcomment -%}
+<div class="gv" id="gallery-viewer" hidden tabindex="-1" role="dialog" aria-modal="true"
+     aria-label="{{ page.title | escape }} photo viewer">
+
+  <div class="gv-strip" id="gv-strip">
+    {%- for pair in page.photos -%}
+      {%- assign meta = pair[1] -%}
+      {%- assign base = meta.basename | prepend: '/' | prepend: site.baseurl -%}
+      {%- capture line -%}
+#{{ forloop.index }}
+{%- if meta.exif.lens %} · {{ meta.exif.lens | escape }}{% endif -%}
+{%- if meta.exif.aperture %} · {{ meta.exif.aperture | escape }}{% endif -%}
+{%- if meta.exif.camera %} · {{ meta.exif.camera | escape }}{% endif -%}
+{%- if meta.exif.shutter %} · {{ meta.exif.shutter | escape }}s{% endif -%}
+{%- if meta.place != blank %} · {{ meta.place | escape }}{% endif -%}
+{%- if meta.country != blank %} · {{ meta.country | escape }}{% endif -%}
+{%- if meta.exif.captured_at %} · {{ meta.exif.captured_at | date: "%B %Y" }}{% endif -%}
+      {%- endcapture -%}
+    <div class="gv-slide" data-index="{{ forloop.index }}"
+         data-meta="{{ line | strip }}"
+         data-note="{{ meta.note | escape }}">
+      <picture>
+        <source srcset="{{ base }}-full.avif" type="image/avif">
+        <img src="{{ base }}-full.webp" alt="{{ meta.alt | escape }}" loading="lazy" decoding="async">
+      </picture>
+    </div>
+    {%- endfor -%}
+  </div>
+
+  {%- comment -%} Edge-zone navigation: big invisible hit area, tiny mark. {%- endcomment -%}
+  <button type="button" class="gv-nav gv-nav--prev" aria-label="Previous photo">
+    <span class="gv-tri" aria-hidden="true"></span>
+  </button>
+  <button type="button" class="gv-nav gv-nav--next" aria-label="Next photo">
+    <span class="gv-tri" aria-hidden="true"></span>
+  </button>
+
+  {%- comment -%}
+  Close + the title-reveal setting, deliberately grouped: the checkbox sits
+  with close (not with the title) to read as a generic viewer preference
+  rather than per-image chrome.
+  {%- endcomment -%}
+  <div class="gv-controls">
+    <label class="gv-setting">
+      <input type="checkbox" class="gv-setting-input" id="gv-title-reveal" checked>
+      <span class="gv-setting-label">title</span>
+    </label>
+    <button type="button" class="gv-close" aria-label="Close viewer">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <p class="gv-meta" id="gv-meta" aria-live="polite"></p>
+
+  <button type="button" class="gv-note-toggle" aria-expanded="false" aria-controls="gv-note"
+          aria-label="Show note">
+    <span class="gv-note-tri" aria-hidden="true"></span>
+  </button>
+  <div class="gv-note" id="gv-note"><p class="gv-note-text"></p></div>
+
+  {% include gallery-title.html style=page.title_style title=page.title %}
+</div>

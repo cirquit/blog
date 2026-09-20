@@ -15,6 +15,11 @@ $serif-primary: 'Libre Baskerville', 'Times New Roman', Times, serif !default;
 $serif-secondary: Palatino, 'Palatino LT STD', 'Palatino Linotype', 'Book Antiqua', 'Georgia', serif !default;
 $sans-serif: 'Helvetica Neue', 'Segoe UI', Helvetica, Arial, sans-serif !default;
 $monospaced: Menlo, Monaco, monospace !default;
+// The gallery viewer's metadata line and note. Computer Modern Typewriter is
+// the intent; no woff2 of it is self-hosted yet (see README), so this falls
+// through to whatever CM-flavored face the reader happens to have, then to a
+// plain system monospace.
+$mono-cm: 'CMU Typewriter Text', 'Latin Modern Mono', 'CMU Serif', ui-monospace, 'SF Mono', Menlo, Consolas, monospace !default;
 
 @mixin box-sizing($type: border-box) {
   -webkit-box-sizing: $type;

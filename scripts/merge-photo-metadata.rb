@@ -4,9 +4,11 @@
 #
 # Usage: merge-photo-metadata.rb <target.md> <slug> <basename> <alt> <exif.json>
 #
-# Creates or updates front_matter['photos'][slug] = { basename, alt, note, exif }.
-# Preserves an existing `note` for that slug across re-runs -- it's the one
-# field a human edits by hand, everything else is machine-managed.
+# Creates or updates
+# front_matter['photos'][slug] = { basename, alt, note, place, country, exif }.
+# Preserves existing `note`, `place` and `country` for that slug across re-runs
+# -- those are the fields a human edits by hand (place/country aren't in EXIF:
+# most cameras have no GPS), everything else is machine-managed.
 
 require 'yaml'
 require 'json'
@@ -48,6 +50,8 @@ front_matter['photos'][slug] = {
   'basename' => basename,
   'alt'      => alt,
   'note'     => existing['note'] || '',
+  'place'    => existing['place'] || '',
+  'country'  => existing['country'] || '',
   'exif'     => exif,
 }
 

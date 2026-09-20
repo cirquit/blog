@@ -40,12 +40,17 @@ mise exec -- bundle exec jekyll serve --drafts --livereload
 | `_includes/footer.html` | The footer line | To change the footer |
 | `_includes/tweet.html` | The tweet-citation snippet | Never (just use it — see §5) |
 | `_includes/photo.html` | Inline photo / lightbox snippet | Never (just use it — see §5) |
+| `_includes/gallery-viewer.html` | The full-frame gallery viewer markup | Never |
+| `_includes/gallery-title.html` | How a gallery's name is revealed (presets) | To add a title preset |
+| `assets/js/gallery-viewer.js` | The site's only script — see §7 | Never |
 | `_galleries/` | One Markdown file per standalone gallery | When adding a gallery |
 | `scripts/make-photo.sh` | Generates web-ready photo files locally | Every time you add a photo |
 | `_includes/head.html` | `<head>`: fonts, inlined CSS, favicons, SEO | Rarely |
 | `_layouts/` | Page skeletons (`default`, `home`, `post`, `gallery`) | Rarely |
 | `_sass/tale/_variables.scss` | **Colors and fonts** | To restyle (see §4) |
 | `_sass/tale/*.scss` | The rest of the stylesheet | To restyle |
+| `_sass/tale/_gallery-viewer.scss` | Viewer layout, arrows, metadata line | To restyle the viewer |
+| `_sass/tale/_gallery-title.scss` | The `title_style:` presets | To add a title preset |
 | `assets/fonts/` | Self-hosted Libre Baskerville (woff2) | Never |
 | `assets/favicon-*.png`, `favicon.ico` | Browser-tab icons | To change the icon |
 | `.github/workflows/deploy.yml` | The publish robot | Never |
@@ -175,6 +180,8 @@ photos:
     basename: assets/photos/your-slug/beach-01
     alt: "Sunset over the pier"
     note: ""                                # flavor text -- yours to write
+    place: ""                               # yours too: EXIF has no GPS
+    country: ""                             # yours too
     exif:
       camera: "FUJIFILM X-A3"
       lens: "XF35mmF2 R WR"
@@ -185,13 +192,36 @@ photos:
       captured_at: "2026-07-01 18:42:00"
 ```
 
-**3. Write `note:` by hand** if you want flavor text under the photo —
-re-running the script for the same slug refreshes EXIF but never overwrites
-a `note` you've already written.
+**3. Write `note:`, `place:` and `country:` by hand.** These three are the
+only fields you ever edit: `note` is the optional flavor text (up to ~4
+lines, plain text, no Markdown), and `place`/`country` can't come from the
+camera — most bodies, the X-A3 included, record no GPS. Re-running the
+script for the same slug refreshes EXIF but **never overwrites a value you
+have already written** in any of the three.
+
+**4. Optionally pick a title style** in the gallery's front matter:
+
+```yaml
+title_style: magazine
+```
+
+This chooses how the gallery's *name* is revealed inside the viewer.
+`magazine` fades the name in, large and uppercase, over the photo for two
+seconds on each navigation, then fades it away again. Omit the field (or
+name a style that doesn't exist) and no title is ever drawn. Presets live in
+`_includes/gallery-title.html` + `_sass/tale/_gallery-title.scss`; today
+there is exactly one.
 
 A standalone gallery (from `_galleries/your-slug.md`) renders at
-`/galleries/your-slug/` as a grid, listed on `/galleries/`; every photo opens
-full-screen on click (EXIF + note shown underneath), no JavaScript.
+`/galleries/your-slug/` as a grid, listed on `/galleries/`. Clicking a photo
+opens the full-frame **gallery viewer**: the photo mounted inside a constant
+black margin, prev/next at the left and right edges (arrow keys, swipe, or
+the triangle marks that appear as the cursor nears an edge), a one-line
+monospace metadata strip in the bottom margin
+(`#N · lens · aperture · body · shutter · place · country · month year`), the
+note beside or below the photo, and a close control (`Esc`, the `×`, or a
+click on the black). The `title` checkbox next to `×` turns the title reveal
+off and remembers that choice in your browser.
 
 **A photo tied only to a post** (no gallery) uses the same `photos:` block,
 just written in that post's own front matter instead, then:
@@ -236,6 +266,19 @@ Already done, don't undo:
 - Font self-hosted (`assets/fonts/`), `font-display: swap`, 400 weight preloaded.
 - Full CSS inlined into `<head>` — zero render-blocking requests.
 - `favicon.ico` is a 1.4 KB PNG-in-ICO.
-- No JavaScript anywhere.
+- No JavaScript anywhere **except** `assets/js/gallery-viewer.js` (~12 KB,
+  deferred, self-hosted, loaded only on a gallery page). It is the one
+  deliberate exception: cross-photo navigation has no pure-CSS mechanism.
+  It is additive — with the script blocked, a gallery still works, each
+  photo opening through the CSS-only `<details>` lightbox. Don't add a
+  second script, and don't load this one anywhere else.
 
-First load: ~25 KB, one domain, one request on the critical path.
+First load: ~25 KB, one domain, one request on the critical path (a gallery
+page adds the one deferred script, off the critical path).
+
+Known follow-up: the viewer's metadata line asks for Computer Modern
+Typewriter, but no woff2 of it is self-hosted yet, so `$mono-cm` in
+`_sass/tale/_variables.scss` currently falls through to the reader's own
+CM-flavored face and then to a system monospace. Self-host it the same way
+Libre Baskerville already is (drop the woff2 in `assets/fonts/`, add an
+`@font-face` in `_includes/head.html`) to finish the intended look.

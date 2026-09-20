@@ -25,3 +25,11 @@ layout: default
 <div class="pagination">
   <a href="#" class="top">Top</a>
 </div>
+
+{%- comment -%}
+The viewer, and the one script on this site. Both are additive: with the
+script blocked, the grid above still opens each photo through its CSS-only
+<details> lightbox, and #gallery-viewer stays hidden and inert.
+{%- endcomment -%}
+{% include gallery-viewer.html %}
+<script defer src="{{ "/assets/js/gallery-viewer.js" | relative_url }}"></script>

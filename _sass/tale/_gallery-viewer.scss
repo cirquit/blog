@@ -1,0 +1,404 @@
+// The gallery viewer: full-frame stage, edge-zone navigation, persistent
+// metadata line, adaptive note. Markup: _includes/gallery-viewer.html.
+// Behavior: assets/js/gallery-viewer.js (the site's one JS exception).
+//
+// Governing principle, applied literally: at rest the frame shows the photo
+// and black. Arrows and the close mark are transparent until approached; the
+// metadata line is the one deliberate exception (always present, kept honest
+// by being tiny and confined to the margin).
+//
+// Title presentation lives entirely in _gallery-title.scss -- nothing here
+// knows what a title looks like.
+
+$gv-z: 2000;
+
+// The constant inset margin the photo is mounted inside. ~9% horizontally
+// per the spec; the bottom is deeper because the metadata line lives there.
+$gv-inset-x: 9vw;
+$gv-inset-top: 7vh;
+$gv-inset-bottom: 11vh;
+
+// When the viewer is open, nothing behind it scrolls.
+html.gv-open,
+html.gv-open body {
+  overflow: hidden;
+}
+
+// With the enhancement live, the CSS-only lightbox steps aside. Its
+// full-size <img>s stay display:none, so they are never fetched.
+html.gv-js .photo-lightbox-full {
+  display: none !important;
+}
+
+.gv {
+  position: fixed;
+  inset: 0;
+  z-index: $gv-z;
+  background: #000;
+  overflow: hidden;
+  outline: none;
+
+  &[hidden] { display: none; }
+}
+
+/* -------------------------------------------------------------- the stage */
+
+.gv-strip {
+  @include transition(opacity .16s ease);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+
+  &.is-fading { opacity: 0; }
+}
+
+.gv-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $gv-inset-top $gv-inset-x $gv-inset-bottom;
+  @include box-sizing;
+
+  picture {
+    display: contents;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+}
+
+/* --------------------------------------------------- edge-zone navigation */
+
+// Hard rule: always a strict left/right pair at the true edges of the frame,
+// never stacked. The hit area is the whole edge zone; the mark inside it is
+// tiny and invisible until approached.
+.gv-nav {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: $gv-inset-x;
+  min-width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  z-index: $gv-z + 2;
+
+  &--prev { left: 0; }
+  &--next { right: 0; }
+
+  &[disabled] {
+    cursor: default;
+    .gv-tri { opacity: 0 !important; }
+  }
+
+  &:focus-visible .gv-tri {
+    opacity: .85;
+    outline: 1px solid rgba(255, 255, 255, .5);
+    outline-offset: 6px;
+  }
+}
+
+// A plain geometric triangle, drawn with borders -- not a glyph, not a
+// chevron, not a hairline tick (all three were tried and rejected).
+.gv-tri {
+  @include transition(opacity .18s ease, transform .18s ease);
+  display: block;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+}
+
+.gv-nav--prev .gv-tri { border-right: 11px solid rgba(255, 255, 255, .85); }
+.gv-nav--next .gv-tri { border-left:  11px solid rgba(255, 255, 255, .85); }
+
+.gv.gv-near-left  .gv-nav--prev:not([disabled]) .gv-tri { opacity: 1; }
+.gv.gv-near-right .gv-nav--next:not([disabled]) .gv-tri { opacity: 1; }
+
+// A tiny nudge toward the edge being approached -- suppressed below under
+// prefers-reduced-motion.
+.gv.gv-near-left  .gv-nav--prev .gv-tri { transform: translateX(-2px); }
+.gv.gv-near-right .gv-nav--next .gv-tri { transform: translateX(2px); }
+
+/* ---------------------------------------------------- close + the setting */
+
+// Close and the title-reveal checkbox are grouped deliberately: together they
+// read as generic viewer affordances rather than per-image chrome. They are
+// the one cluster allowed to stay (quietly) visible at rest.
+.gv-controls {
+  @include transition(opacity .18s ease);
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: $gv-z + 2;
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  padding: 1.1rem 1.3rem;
+  opacity: .35;
+
+  &:hover,
+  &:focus-within {
+    opacity: 1;
+  }
+}
+
+.gv-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(255, 255, 255, .9);
+  font-family: $sans-serif;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 1px solid rgba(255, 255, 255, .5);
+    outline-offset: -6px;
+  }
+}
+
+.gv-setting {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  min-height: 44px;
+  color: rgba(255, 255, 255, .8);
+  font-family: $mono-cm;
+  font-size: .7rem;
+  letter-spacing: .04em;
+  cursor: pointer;
+  user-select: none;
+}
+
+.gv-setting-input {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  accent-color: #fff;
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------- metadata line */
+
+// Persistent by explicit decision -- the one element exempt from
+// "invisible until engaged with". Kept disciplined instead by being tiny,
+// single-line, and confined to the bottom margin.
+.gv-meta {
+  position: absolute;
+  left: 50%;
+  bottom: 1.4rem;
+  transform: translateX(-50%);
+  z-index: $gv-z + 1;
+  max-width: 80ch;              // literal 80ch: meaningful because monospace
+  width: calc(100% - 2 * #{$gv-inset-x});
+  margin: 0;
+  padding: 0;
+  color: rgba(255, 255, 255, .62);
+  font-family: $mono-cm;
+  font-size: .72rem;
+  line-height: 1.4;
+  letter-spacing: .01em;
+  text-align: center;
+  white-space: nowrap;          // truncate, never wrap
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------- the note */
+
+// Adaptive placement, set by the script: the side gutter when a portrait
+// photo on a wide screen leaves one, otherwise a tap-to-expand dropdown
+// over a gradient at the bottom of the photo.
+.gv-note {
+  position: absolute;
+  z-index: $gv-z + 1;
+  color: rgba(255, 255, 255, .8);
+  font-family: $mono-cm;
+  font-size: .78rem;
+  line-height: 1.5;
+  pointer-events: none;
+
+  .gv-note-text {
+    margin: 0;
+    max-width: 80ch;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;                 // up to 4 lines, plain text
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.gv-note-toggle {
+  @include transition(opacity .18s ease);
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: $gv-z + 2;
+  display: none;                           // only in dropdown mode, see below
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  opacity: .45;
+
+  &:hover, &:focus-visible { opacity: 1; }
+}
+
+.gv-note-tri {
+  @include transition(transform .18s ease);
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid rgba(255, 255, 255, .85);
+}
+
+// Nothing at all when the photo has no note.
+.gv:not(.gv-has-note) .gv-note,
+.gv:not(.gv-has-note) .gv-note-toggle {
+  display: none;
+}
+
+// Gutter mode: position/size come from the script (it measures the real
+// rendered image box); here we only say it is plain text in the margin.
+.gv.gv-has-note.gv-note-gutter .gv-note {
+  display: block;
+  bottom: auto;
+  right: auto;
+}
+
+// Dropdown mode: overlays the bottom of the photo behind a gradient that
+// fades from the black background to fully transparent -- enough contrast
+// to read without a hard-edged box.
+.gv.gv-has-note.gv-note-drop {
+  .gv-note {
+    @include transition(opacity .18s ease);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 4.5rem 1.4rem calc(#{$gv-inset-bottom} + 1.2rem);
+    background: linear-gradient(to top, rgba(0, 0, 0, .92) 45%, rgba(0, 0, 0, 0) 100%);
+    opacity: 0;
+    @include box-sizing;
+  }
+
+  .gv-note-toggle {
+    display: flex;
+  }
+
+  &.gv-note-open .gv-note {
+    opacity: 1;
+  }
+
+  // The same tiny arrow collapses it, now pointing up.
+  &.gv-note-open .gv-note-tri {
+    transform: rotate(180deg);
+  }
+}
+
+/* ------------------------------------------------- platform adaptations */
+
+// Phone: the close cluster moves to a bottom corner. Top corners are a known
+// bad spot for one-handed reach; the metadata line takes the row above it,
+// and the note toggle mirrors it in the opposite bottom corner.
+@media (max-width: 40em) {
+  .gv-slide {
+    padding: 5vh 7vw 14vh;
+  }
+
+  // The hit area stays at the 44px accessibility floor, which is wider than
+  // the 7vw margin -- so pin the visible mark to the outer edge of the zone.
+  // The tap target may overlap the photo; the triangle must not.
+  .gv-nav {
+    width: 7vw;
+    min-width: 44px;
+  }
+
+  .gv-nav--prev {
+    justify-content: flex-start;
+    padding-left: 5px;
+  }
+
+  .gv-nav--next {
+    justify-content: flex-end;
+    padding-right: 5px;
+  }
+
+  .gv-controls {
+    top: auto;
+    bottom: 0;
+    padding: .5rem .9rem 1rem;
+  }
+
+  .gv-meta {
+    bottom: 4.2rem;
+    width: calc(100% - 2rem);
+    font-size: .66rem;
+  }
+
+  .gv.gv-has-note.gv-note-drop .gv-note {
+    padding-bottom: 6rem;
+  }
+
+  .gv-note-toggle {
+    left: .4rem;
+    bottom: .5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gv-strip,
+  .gv-tri,
+  .gv-controls,
+  .gv-note,
+  .gv-note-tri,
+  .gv-note-toggle {
+    transition: none !important;
+  }
+
+  // No hover-nudge under reduced motion.
+  .gv.gv-near-left  .gv-nav--prev .gv-tri,
+  .gv.gv-near-right .gv-nav--next .gv-tri {
+    transform: none;
+  }
+
+  .gv-strip {
+    scroll-behavior: auto;
+  }
+}

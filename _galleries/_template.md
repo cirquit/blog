@@ -2,6 +2,7 @@
 layout: gallery
 title: "TITLE HERE"
 date: 2026-01-01
+title_style: magazine   # how the gallery name is revealed in the viewer; only `magazine` exists
 photos: {}
 ---
 
@@ -17,8 +18,9 @@ photos: {}
 
      This generates the derivative files under assets/photos/your-slug/
      AND writes/updates a `photos.<photo-slug>` entry below automatically
-     (basename, alt, auto-extracted EXIF, and an empty `note` field).
-  4. Edit `note:` per photo if you want flavor text -- re-running the
-     script never overwrites a `note` you've already written.
+     (basename, alt, auto-extracted EXIF, and empty `note`, `place` and
+     `country` fields).
+  4. Edit `note:`, `place:` and `country:` per photo by hand if you want
+     them -- re-running the script never overwrites a value you've written.
   5. Commit. Nothing here ever runs in CI.
 -->

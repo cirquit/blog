@@ -1,0 +1,79 @@
+// Gallery-title presets. The viewer engine never styles a title itself --
+// it includes _includes/gallery-title.html, which picks one block from here
+// via `gallery-title--<style>`. Add a preset by adding a block here and the
+// name to the `known` list in that include; nothing else changes.
+//
+// Curated on purpose, not unlimited. Exactly one preset is real today:
+// `magazine`. (`minimal` letterspaced small-caps and a vertical `spine`
+// treatment were mocked and explicitly not chosen -- do not add them back.)
+
+// Shared scaffolding: every preset is a positioned, fully-transparent layer
+// over the current photo. The script positions it against the image's own
+// rendered box and toggles `.is-revealed`.
+.gallery-title {
+  position: absolute;
+  z-index: 2001;
+  display: flex;
+  pointer-events: none;
+  opacity: 0;
+  @include transition(opacity .45s ease);
+
+  &.is-revealed { opacity: 1; }
+}
+
+// The inert default: a gallery with no (or an unknown) `title_style` draws
+// nothing at all, ever.
+.gallery-title--plain {
+  display: none;
+}
+
+/* ------------------------------------------------------------- magazine */
+
+// Two-phase reveal: the name fades in with a scrim behind it purely for
+// legibility, then everything fades back out, leaving the raw photo. The
+// scrim exists only for this transient moment -- it is the single, narrow
+// exception to "never overlay anything on the photo", and it is why a
+// persistent gallery-name banner is explicitly not wanted.
+.gallery-title--magazine {
+  align-items: flex-end;
+
+  .gallery-title-scrim {
+    @include transition(opacity .45s ease);
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, .68) 0%, rgba(0, 0, 0, 0) 100%);
+  }
+
+  .gallery-title-text {
+    @include transition(transform .45s ease);
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0 .5em .35em;
+    color: #fff;
+    font-family: $sans-serif;
+    font-weight: 700;
+    font-size: 1em;                 // the script sets the px value from the
+    line-height: 1.02;              // image's own width, so it fits the photo
+    letter-spacing: -.02em;
+    text-transform: uppercase;
+    transform: translateY(6px);
+    @include box-sizing;
+  }
+
+  &.is-revealed .gallery-title-text {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-title,
+  .gallery-title--magazine .gallery-title-scrim,
+  .gallery-title--magazine .gallery-title-text {
+    transition: none !important;
+  }
+
+  .gallery-title--magazine .gallery-title-text {
+    transform: none;
+  }
+}
