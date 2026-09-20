@@ -18,16 +18,10 @@ $gv-inset-x: 9vw;
 $gv-inset-top: 7vh;
 $gv-inset-bottom: 11vh;
 
-// When the viewer is open, nothing behind it scrolls.
-html.gv-open,
-html.gv-open body {
+// The viewer is the whole page, always -- nothing behind it should scroll.
+// A plain selector, not a JS-added class: there is no "open" state to track.
+body:has(.gv) {
   overflow: hidden;
-}
-
-// With the enhancement live, the CSS-only lightbox steps aside. Its
-// full-size <img>s stay display:none, so they are never fetched.
-html.gv-js .photo-lightbox-full {
-  display: none !important;
 }
 
 .gv {
@@ -37,8 +31,6 @@ html.gv-js .photo-lightbox-full {
   background: #000;
   overflow: hidden;
   outline: none;
-
-  &[hidden] { display: none; }
 }
 
 /* -------------------------------------------------------------- the stage */
@@ -96,7 +88,7 @@ html.gv-js .photo-lightbox-full {
   top: 0;
   bottom: 0;
   width: $gv-inset-x;
-  min-width: 56px;
+  min-width: 96px;      // was 56px -- too easy to miss
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,6 +172,7 @@ html.gv-js .photo-lightbox-full {
   font-family: $sans-serif;
   font-size: 1.5rem;
   line-height: 1;
+  text-decoration: none;   // it's a real <a> now, not a <button>
   cursor: pointer;
 
   &:focus-visible {
@@ -365,12 +358,12 @@ html.gv-js .photo-lightbox-full {
     padding: 5vh 7vw 14vh;
   }
 
-  // The hit area stays at the 44px accessibility floor, which is wider than
-  // the 7vw margin -- so pin the visible mark to the outer edge of the zone.
-  // The tap target may overlap the photo; the triangle must not.
+  // The hit area is wider than the 7vw margin, so pin the visible mark to
+  // the outer edge of the zone. The tap target may overlap the photo; the
+  // triangle must not.
   .gv-nav {
     width: 7vw;
-    min-width: 44px;
+    min-width: 64px;     // was the 44px accessibility floor -- too easy to miss
   }
 
   .gv-nav--prev {

@@ -1,22 +1,26 @@
 {%- comment -%}
-The gallery viewer: a full-frame stage that shows one photo at a time with
-prev/next navigation, a persistent metadata line, the optional note, and the
-swappable gallery-title component.
+The gallery viewer IS the gallery page -- there is no thumbnail grid. This
+is the site's ONE deliberate JavaScript exception (assets/js/gallery-viewer.js),
+because cross-photo navigation has no pure-CSS mechanism. Without JS, the
+slide strip is still a real, native CSS scroll-snap carousel -- swipe/scroll
+works, just without synced metadata, buttons, or the title/note behavior.
 
-Rendered `hidden` and stays hidden unless assets/js/gallery-viewer.js runs --
-the site's ONE deliberate JavaScript exception, because jumping from one
-photo's open state to another's has no pure-CSS mechanism. Without JS the
-gallery grid's existing CSS-only <details> lightbox handles opening a single
-photo, exactly as before; the viewer only adds cross-photo navigation, the
-crossfade, the title reveal and the settings checkbox on top.
+Slide 0 is the gallery's cover: its title renders permanently (not the
+transient flash the other slides get) and its metadata/note show the
+gallery's own name/date/description instead of that photo's EXIF/note. This
+one page, at its own URL, IS how a gallery gets linked.
 
-Reads page.photos (basename / alt / note / place / country / exif) and
-page.title_style. Everything per-photo the script needs is baked into data-
-attributes at build time, so the script itself stays tiny and does no
-formatting.
+Reads page.photos (basename / alt / note / place / country / exif),
+page.title_style, page.title, page.date, and page.description (the gallery's
+own flavor text -- same rules as a photo's note). Everything the script
+needs is baked into data-attributes at build time, so it does no formatting.
 {%- endcomment -%}
-<div class="gv" id="gallery-viewer" hidden tabindex="-1" role="dialog" aria-modal="true"
-     aria-label="{{ page.title | escape }} photo viewer">
+{%- capture cover_meta -%}
+{{ page.title | escape }}{% if page.date %} · {{ page.date | date: "%B %Y" }}{% endif %}
+{%- endcapture -%}
+<div class="gv" id="gallery-viewer"
+     data-cover-meta="{{ cover_meta | strip }}"
+     data-cover-note="{{ page.description | escape }}">
 
   <div class="gv-strip" id="gv-strip">
     {%- for pair in page.photos -%}
@@ -66,9 +70,9 @@ formatting.
         <line class="gv-title-icon-slash" x1="3" y1="21" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
-    <button type="button" class="gv-close" aria-label="Close viewer">
+    <a class="gv-close" href="{{ '/galleries/' | prepend: site.baseurl }}" aria-label="Back to galleries">
       <span aria-hidden="true">&times;</span>
-    </button>
+    </a>
   </div>
 
   <p class="gv-meta" id="gv-meta" aria-live="polite"></p>

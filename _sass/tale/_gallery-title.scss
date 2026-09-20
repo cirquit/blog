@@ -31,6 +31,14 @@
   &.is-revealed {
     animation: gallery-title-flash 5s linear forwards;
   }
+
+  // The gallery's cover slide (index 0) shows its title permanently -- no
+  // flash, no fade. JS never even starts the animation for it (see
+  // updateTitleMode), but !important here means that holds regardless.
+  &.is-cover {
+    opacity: 1 !important;
+    animation: none !important;
+  }
 }
 
 // The inert default: a gallery with no (or an unknown) `title_style` draws

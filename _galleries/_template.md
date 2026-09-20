@@ -3,6 +3,7 @@ layout: gallery
 title: "TITLE HERE"
 date: 2026-01-01
 title_style: magazine   # how the gallery name is revealed in the viewer; only `magazine` exists
+description: ""         # optional flavor text for the cover slide -- same rules as a photo's note (plain text, ~60ch/4 lines)
 photos: {}
 ---
 
@@ -11,7 +12,11 @@ photos: {}
   1. Copy this file to _galleries/your-slug.md (no leading underscore --
      a leading underscore makes Jekyll silently skip the file, which is
      exactly why this template itself is never built).
-  2. Set `title` and `date` above.
+  2. Set `title`, `date`, and optionally `description` above. This gallery's
+     page IS the viewer -- there's no separate thumbnail grid -- and its
+     first photo doubles as the cover: permanent title, this description
+     shown instead of per-photo EXIF/note. That single URL is how the
+     gallery gets linked.
   3. For each photo, run from the repo root:
 
        scripts/make-photo.sh <source.jpg> _galleries/your-slug.md <photo-slug> "Alt text"

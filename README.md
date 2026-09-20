@@ -167,7 +167,7 @@ scripts/make-photo.sh ~/Pictures/export.jpg _galleries/your-slug.md beach-01 "Su
 This generates four sRGB-normalized, compressed files under
 `assets/photos/your-slug/`:
 
-- `beach-01-thumb.avif` / `.webp` — ~600px, for a gallery grid tile (~20-70 KB)
+- `beach-01-thumb.avif` / `.webp` — ~600px, for an inline lightbox thumbnail (~20-70 KB)
 - `beach-01-full.avif` / `.webp` — ~2560px, for inline display or a lightbox (~100-800 KB)
 
 ...and **auto-fills a `photos.beach-01` entry** in `_galleries/your-slug.md`'s
@@ -207,21 +207,39 @@ title_style: magazine
 
 This chooses how the gallery's *name* is revealed inside the viewer.
 `magazine` fades the name in, large and uppercase, over the photo for two
-seconds on each navigation, then fades it away again. Omit the field (or
-name a style that doesn't exist) and no title is ever drawn. Presets live in
+seconds on each navigation, then fades it away again — except on the cover
+(see below), where it stays on permanently. Omit the field (or name a style
+that doesn't exist) and no title is ever drawn. Presets live in
 `_includes/gallery-title.html` + `_sass/tale/_gallery-title.scss`; today
 there is exactly one.
 
-A standalone gallery (from `_galleries/your-slug.md`) renders at
-`/galleries/your-slug/` as a grid, listed on `/galleries/`. Clicking a photo
-opens the full-frame **gallery viewer**: the photo mounted inside a constant
-black margin, prev/next at the left and right edges (arrow keys, swipe, or
-the triangle marks that appear as the cursor nears an edge), a one-line
-monospace metadata strip in the bottom margin
-(`#N · lens · aperture · body · shutter · place · country · month year`), the
-note beside or below the photo, and a close control (`Esc`, the `×`, or a
-click on the black). The `title` checkbox next to `×` turns the title reveal
-off and remembers that choice in your browser.
+A standalone gallery (from `_galleries/your-slug.md`) has no thumbnail grid
+— its page at `/galleries/your-slug/` **is** the full-frame **gallery
+viewer**, starting on that gallery's first photo. That one URL is how a
+gallery gets linked at all.
+
+The first photo doubles as the **cover**: its title stays on permanently
+(not the two-second flash every other photo gets), and the metadata
+line/note show the gallery's own `title`/`date`/`description` instead of
+that photo's EXIF/note. `description` is optional gallery-level flavor
+text — same rules as a photo's `note` (plain text, ~60 characters wide, up
+to ~4 lines).
+
+The viewer itself: the photo mounted inside a constant black margin,
+prev/next at the left and right edges (arrow keys, swipe, or the triangle
+marks that appear as the cursor nears an edge), a one-line monospace
+metadata strip in the bottom margin
+(`#N · lens · aperture · body · shutter · place · country · month year` on
+every photo but the cover), the note beside or below the photo, and a real
+`←` link back to `/galleries/` (also `Esc`) — there's no click-to-close on
+the black margin anymore. The `T` toggle (icon or the `T` key) turns the
+title reveal off and remembers that choice in your browser.
+
+`/galleries/` itself lists every gallery by its cover, laid out as columns
+(not a uniform grid) so portrait and landscape covers each keep their real
+aspect ratio — nothing is ever cropped. Each cover shows the same permanent
+title treatment as the gallery's own cover slide, rendered live in CSS
+(no JS runs on this page), so it also scales with the actual column width.
 
 **A photo tied only to a post** (no gallery) uses the same `photos:` block,
 just written in that post's own front matter instead, then:

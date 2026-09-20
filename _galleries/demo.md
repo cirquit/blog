@@ -3,6 +3,9 @@ layout: gallery
 title: Demo gallery
 date: 2026-09-20
 title_style: magazine
+description: 'A small, real example gallery -- two sample photos from the pipeline
+  build, used to check the viewer against actual EXIF, real color, and real
+  aspect ratios rather than a mockup.'
 photos:
   beach-01:
     basename: assets/photos/demo/beach-01

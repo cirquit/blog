@@ -15,11 +15,10 @@ permalink: /galleries/
       {% assign cover_src = cover.basename | prepend: '/' | prepend: site.baseurl %}
       <a class="gallery-index-item" href="{{ gallery.url | prepend: site.baseurl }}">
         <picture>
-          <source srcset="{{ cover_src }}-thumb.avif" type="image/avif">
-          <img src="{{ cover_src }}-thumb.webp" alt="{{ gallery.title }}" loading="lazy" decoding="async">
+          <source srcset="{{ cover_src }}-full.avif" type="image/avif">
+          <img src="{{ cover_src }}-full.webp" alt="{{ gallery.title }}" loading="lazy" decoding="async">
         </picture>
-        <span class="gallery-index-title">{{ gallery.title }}</span>
-        <time class="gallery-index-date" datetime="{{ gallery.date }}">{{ gallery.date | date: "%B %d, %Y" }}</time>
+        {% include gallery-title.html style=gallery.title_style title=gallery.title permanent=true %}
       </a>
     {% endfor %}
   </div>

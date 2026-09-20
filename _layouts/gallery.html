@@ -2,34 +2,12 @@
 layout: default
 ---
 
-<div class="post">
-  <div class="post-info">
-    {% if page.date %}
-      <span>on&nbsp;</span><time datetime="{{ page.date }}">{{ page.date | date: "%B %d, %Y" }}</time>
-    {% endif %}
-  </div>
-
-  <h1 class="post-title">{{ page.title }}</h1>
-  <div class="post-line"></div>
-
-  {{ content }}
-
-  <div class="photo-gallery-grid">
-    {% for pair in page.photos %}
-      {% assign photo_slug = pair[0] %}
-      {% include photo-lightbox-item.html slug=photo_slug %}
-    {% endfor %}
-  </div>
-</div>
-
-<div class="pagination">
-  <a href="#" class="top">Top</a>
-</div>
-
 {%- comment -%}
-The viewer, and the one script on this site. Both are additive: with the
-script blocked, the grid above still opens each photo through its CSS-only
-<details> lightbox, and #gallery-viewer stays hidden and inert.
+No thumbnail grid: the viewer below IS the page. Slide 0 doubles as the
+gallery's cover (permanent title, gallery-level metadata/description) --
+see _includes/gallery-viewer.html and assets/js/gallery-viewer.js. Optional
+body Markdown in the gallery's own file (rare) still renders above it.
 {%- endcomment -%}
+{{ content }}
 {% include gallery-viewer.html %}
 <script defer src="{{ "/assets/js/gallery-viewer.js" | relative_url }}"></script>

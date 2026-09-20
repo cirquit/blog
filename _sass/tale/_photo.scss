@@ -123,38 +123,44 @@
   }
 }
 
+// A magazine layout, not a uniform grid: CSS columns let portrait and
+// landscape covers sit at their own real aspect ratio, side by side --
+// no cropping, ever. (Horizontal-specific title fitting is a later pass;
+// for now the same live component just renders at whatever size the
+// column gives it.)
 .gallery-index-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem;
+  column-count: 1;
+  column-gap: 1.5rem;
   margin: 2em 0;
+
+  @media (min-width: 40em) { column-count: 2; }
+  @media (min-width: 64em) { column-count: 3; }
 }
 
 .gallery-index-item {
+  position: relative;
   display: block;
-  color: $default-color;
+  break-inside: avoid;
+  margin-bottom: 1.5rem;
+  container-type: inline-size;
 
   picture,
   img {
     display: block;
     width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
+    height: auto;
     border-radius: 4px;
   }
 
-  .gallery-index-title {
-    display: block;
-    margin-top: .5rem;
-    font-family: $sans-serif;
-    font-weight: 700;
-    color: $default-shade;
+  // No JS runs on this page, so the title can't be measured/positioned
+  // against the image the way the viewer does it -- container query units
+  // give the same "scales with the photo" effect declaratively instead.
+  // permanent=true (see the include call) means it needs no trigger at all.
+  .gallery-title {
+    inset: 0;
   }
 
-  .gallery-index-date {
-    display: block;
-    font-family: $serif-secondary;
-    font-size: .8rem;
-    color: $default-tint;
+  .gallery-title-text {
+    font-size: 7cqi;
   }
 }
