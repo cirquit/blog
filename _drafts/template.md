@@ -21,6 +21,18 @@ Write the post in Markdown here.
 -->
 
 <!--
+  PHOTO INLINE (optional) — run scripts/make-photo.sh first, see README §5:
+
+  {% include photo.html
+     src="assets/photos/2026-summer/beach-01"
+     alt="Sunset over the pier"
+     caption="Optional caption"
+     lightbox=true %}
+
+  `src` and `alt` are required. Drop `lightbox` for a plain sized-to-post photo.
+-->
+
+<!--
   TO PUBLISH:
   1. Copy this file to _posts/YYYY-MM-DD-slug.md  (real date, dashes only)
   2. Set `title` and `date` above, keep the `---` fences

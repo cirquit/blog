@@ -39,8 +39,11 @@ mise exec -- bundle exec jekyll serve --drafts --livereload
 | `_includes/navigation.html` | The top nav links | To add/rename menu items |
 | `_includes/footer.html` | The footer line | To change the footer |
 | `_includes/tweet.html` | The tweet-citation snippet | Never (just use it — see §5) |
+| `_includes/photo.html` | Inline photo / lightbox snippet | Never (just use it — see §5) |
+| `_galleries/` | One Markdown file per standalone gallery | When adding a gallery |
+| `scripts/make-photo.sh` | Generates web-ready photo files locally | Every time you add a photo |
 | `_includes/head.html` | `<head>`: fonts, inlined CSS, favicons, SEO | Rarely |
-| `_layouts/` | Page skeletons (`default`, `home`, `post`) | Rarely |
+| `_layouts/` | Page skeletons (`default`, `home`, `post`, `gallery`) | Rarely |
 | `_sass/tale/_variables.scss` | **Colors and fonts** | To restyle (see §4) |
 | `_sass/tale/*.scss` | The rest of the stylesheet | To restyle |
 | `assets/fonts/` | Self-hosted Libre Baskerville (woff2) | Never |
@@ -138,10 +141,54 @@ Anywhere in a post:
 Only `url` and `text` are required. Renders as a static quote box — no
 JavaScript, nothing loads from X, and it survives the tweet being deleted.
 
-### Images
+### Add a photo
 
-Put the file in `assets/`, reference it: `![alt text](/blog/assets/photo.jpg)`.
-Compress it first (aim < 200 KB) — one raw photo outweighs the whole rest of the page.
+Unlike text, a photo needs one local step before committing — it never
+happens in CI, and only the small generated files ever enter the repo, never
+the raw camera export:
+
+```sh
+scripts/make-photo.sh ~/Pictures/export.jpg assets/photos/2026-summer beach-01
+```
+
+Requires [libvips](https://www.libvips.org/) (`brew install vips`). Produces
+four sRGB-normalized, compressed files:
+
+- `beach-01-thumb.avif` / `.webp` — ~600px, for a gallery grid tile (~20-70 KB)
+- `beach-01-full.avif` / `.webp` — ~2560px, for inline display or a lightbox (~100-800 KB)
+
+**Inline in a post:**
+
+```liquid
+{% include photo.html
+   src="assets/photos/2026-summer/beach-01"
+   alt="Sunset over the pier"
+   caption="Optional caption"
+   lightbox=true %}
+```
+
+`src` and `alt` are required. Leave out `lightbox` for a plain photo sized to
+the post; set `lightbox=true` for click-to-enlarge (thumbnail + full-screen
+view — CSS only, no JavaScript).
+
+**A standalone gallery:** add a file to `_galleries/`, e.g. `_galleries/2026-summer.md`:
+
+```yaml
+---
+layout: gallery
+title: "Summer 2026"
+date: 2026-07-01
+photos:
+  - basename: assets/photos/2026-summer/beach-01
+    alt: "Sunset over the pier"
+    caption: "Optional caption"
+  - basename: assets/photos/2026-summer/beach-02
+    alt: "..."
+---
+```
+
+Renders at `/galleries/2026-summer/` as a grid; every photo opens full-screen
+on click, no JavaScript.
 
 ---
 

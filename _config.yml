@@ -25,6 +25,11 @@ paginate:       5                              # posts per page on the home page
 include:
   - _pages
 
+collections:
+  galleries:
+    output: true                               # each gallery gets its own page, e.g. /galleries/summer-2026/
+    permalink: /galleries/:path/
+
 plugins:
   - jekyll-feed                                # generates /feed.xml
   - jekyll-paginate                            # home-page pagination
@@ -44,3 +49,4 @@ exclude:
   - README.md
   - LICENSE
   - mise.toml
+  - scripts

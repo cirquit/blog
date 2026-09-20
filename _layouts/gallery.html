@@ -1,0 +1,26 @@
+---
+layout: default
+---
+
+<div class="post">
+  <div class="post-info">
+    {% if page.date %}
+      <span>on&nbsp;</span><time datetime="{{ page.date }}">{{ page.date | date: "%B %d, %Y" }}</time>
+    {% endif %}
+  </div>
+
+  <h1 class="post-title">{{ page.title }}</h1>
+  <div class="post-line"></div>
+
+  {{ content }}
+
+  <div class="photo-gallery-grid">
+    {% for photo in page.photos %}
+      {% include photo-lightbox-item.html src=photo.basename alt=photo.alt caption=photo.caption %}
+    {% endfor %}
+  </div>
+</div>
+
+<div class="pagination">
+  <a href="#" class="top">Top</a>
+</div>

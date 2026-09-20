@@ -1,0 +1,109 @@
+// Inline photos (photo.html) and gallery grids (_galleries collection),
+// including the CSS-only <details>/<summary> lightbox. No JavaScript.
+
+.photo-figure {
+  margin: 2em 0;
+
+  .photo-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+}
+
+.photo-caption {
+  margin-top: .5em;
+  font-family: $sans-serif;
+  font-size: .8rem;
+  color: $default-tint;
+  text-align: center;
+}
+
+.photo-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: .75rem;
+  margin: 2em 0;
+}
+
+.photo-lightbox {
+  margin: 0;
+
+  .photo-lightbox-summary {
+    display: block;
+    cursor: zoom-in;
+    list-style: none;
+
+    &::-webkit-details-marker,
+    &::marker {
+      display: none;
+      content: '';
+    }
+  }
+
+  .photo-lightbox-thumb-pic img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .photo-lightbox-full {
+    display: none;
+  }
+
+  &[open] {
+    .photo-lightbox-summary {
+      @include transition(background-color .15s ease-out);
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem;
+      background: rgba(0, 0, 0, .92);
+      cursor: zoom-out;
+    }
+
+    .photo-lightbox-thumb-pic {
+      display: none;
+    }
+
+    .photo-lightbox-full {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+
+      .photo-lightbox-full-pic img {
+        display: block;
+        max-width: 100%;
+        max-height: 85vh;
+        margin: 0 auto;
+        object-fit: contain;
+      }
+
+      .photo-lightbox-caption {
+        display: block;
+        margin-top: 1rem;
+        font-family: $sans-serif;
+        font-size: .85rem;
+        color: $white;
+        text-align: center;
+      }
+    }
+  }
+
+  .photo-caption {
+    margin-top: .4em;
+  }
+
+  &[open] > .photo-caption {
+    display: none;
+  }
+}

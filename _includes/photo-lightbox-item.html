@@ -1,0 +1,24 @@
+{%- comment -%}
+Internal partial: one CSS-only lightbox photo (thumbnail -> full-screen on
+click, via <details>/<summary>, no JavaScript). Used by both the gallery
+layout and photo.html (when lightbox: true). Not meant to be included
+directly from a post -- use `{% include photo.html %}` instead.
+Params: src (required, basename with no extension), alt (required),
+caption (optional).
+{%- endcomment -%}
+<details class="photo-lightbox">
+  <summary class="photo-lightbox-summary">
+    <picture class="photo-lightbox-thumb-pic">
+      <source srcset="{{ include.src | prepend: '/' | prepend: site.baseurl }}-thumb.avif" type="image/avif">
+      <img src="{{ include.src | prepend: '/' | prepend: site.baseurl }}-thumb.webp" alt="{{ include.alt }}" loading="lazy" decoding="async">
+    </picture>
+    <span class="photo-lightbox-full">
+      <picture class="photo-lightbox-full-pic">
+        <source srcset="{{ include.src | prepend: '/' | prepend: site.baseurl }}-full.avif" type="image/avif">
+        <img src="{{ include.src | prepend: '/' | prepend: site.baseurl }}-full.webp" alt="{{ include.alt }}" loading="lazy" decoding="async">
+      </picture>
+      {% if include.caption %}<span class="photo-lightbox-caption">{{ include.caption }}</span>{% endif %}
+    </span>
+  </summary>
+  {% if include.caption %}<figcaption class="photo-caption">{{ include.caption }}</figcaption>{% endif %}
+</details>
