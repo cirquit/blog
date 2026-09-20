@@ -88,7 +88,7 @@ body:has(.gv) {
   top: 0;
   bottom: 0;
   width: $gv-inset-x;
-  min-width: 96px;      // was 56px -- too easy to miss
+  min-width: 140px;     // was 56px, then 96px -- still too easy to miss
   display: flex;
   align-items: center;
   justify-content: center;
@@ -225,70 +225,77 @@ body:has(.gv) {
   opacity: 1;
 }
 
-/* ------------------------------------------------------- metadata line */
+/* ------------------------------------------------------- the info panel */
 
-// Persistent by explicit decision -- the one element exempt from
-// "invisible until engaged with". Kept disciplined instead by being tiny,
-// single-line, and confined to the bottom margin.
-.gv-meta {
-  position: absolute;
-  left: 50%;
-  bottom: 1.4rem;
-  transform: translateX(-50%);
+// One panel, one placement decision, per slide -- replaces what used to be
+// two independently-placed elements (a fixed-bottom metadata line and a
+// separately-adaptive note box) that silently competed for the same gutter
+// space. Each .gv-slide carries its own .gv-info (pre-rendered at build
+// time -- a chip list for a real photo, a labeled block for the cover/its
+// duplicate); only the current slide's copy is ever `.is-current`.
+//
+// Persistent by explicit decision -- the title/chip-list content is exempt
+// from "invisible until engaged with" and is never hidden behind a tap.
+// Only the optional note text collapses, and only when there's no gutter
+// room for it (see .gv-info-drop below).
+.gv-info {
+  display: none;
+  // Fixed, not absolute: this panel lives inside .gv-slide, which lives
+  // inside .gv-strip -- and .gv-strip is itself `position: absolute` and
+  // the thing that scrolls. An absolutely-positioned descendant takes that
+  // as its containing block (it's nearer than .gv), so its inline
+  // left/top would silently drift by the strip's own scrollLeft. Fixed
+  // positioning anchors to the viewport regardless of DOM nesting depth,
+  // which is what the JS's viewport-relative getBoundingClientRect() math
+  // already assumes.
+  position: fixed;
   z-index: $gv-z + 1;
-  max-width: 80ch;              // literal 80ch: meaningful because monospace
-  width: calc(100% - 2 * #{$gv-inset-x});
-  margin: 0;
-  padding: 0;
-  color: rgba(255, 255, 255, .62);
-  font-family: $mono-cm;
-  font-size: .72rem;
-  line-height: 1.4;
-  letter-spacing: .01em;
-  text-align: center;
-  white-space: nowrap;          // truncate, never wrap
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ------------------------------------------------------------- the note */
-
-// Adaptive placement, set by the script: the side gutter when a portrait
-// photo on a wide screen leaves one, otherwise a tap-to-expand dropdown
-// over a gradient at the bottom of the photo.
-.gv-note {
-  position: absolute;
-  z-index: $gv-z + 1;
+  max-width: 220px;
   color: rgba(255, 255, 255, .8);
   font-family: $mono-cm;
-  font-size: .78rem;
+  font-size: .7rem;
   line-height: 1.5;
-  pointer-events: none;
 
-  .gv-note-text {
-    margin: 0;
-    max-width: 60ch;                       // literal 60ch: meaningful because monospace
-    max-height: 4 * 1.5em;                 // up to 4 lines, plain text
-    overflow: hidden;
-    // A hard 4th-line clip reads as a bug. Dissolving the last few pixels
-    // into the black background instead makes any overflow read as a
-    // deliberate part of the negative space, not a cutoff.
-    -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
-            mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
-  }
+  &.is-current { display: block; }
+}
+
+.gv-info-line {
+  margin: 0 0 .3em;
+  color: rgba(255, 255, 255, .85);
+}
+
+.gv-meta-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35em .7em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: rgba(255, 255, 255, .62);
+  letter-spacing: .01em;
+}
+
+.gv-license {
+  color: inherit;
+  border-bottom: 1px solid rgba(255, 255, 255, .35);
+}
+
+.gv-note-text {
+  margin: .5em 0 0;
+  max-width: 60ch;                       // literal 60ch: meaningful because monospace
+  max-height: 4 * 1.5em;                 // up to 4 lines, plain text
+  overflow: hidden;
+  color: rgba(255, 255, 255, .8);
 }
 
 .gv-note-toggle {
   @include transition(opacity .18s ease);
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  z-index: $gv-z + 2;
   display: none;                           // only in dropdown mode, see below
   align-items: center;
   justify-content: center;
   width: 44px;
   height: 44px;
+  margin-left: -.6rem;
   padding: 0;
   border: 0;
   background: none;
@@ -308,59 +315,62 @@ body:has(.gv) {
   border-top: 8px solid rgba(255, 255, 255, .85);
 }
 
-// Nothing at all when the photo has no note.
-.gv:not(.gv-has-note) .gv-note,
-.gv:not(.gv-has-note) .gv-note-toggle {
-  display: none;
-}
-
 // Gutter mode: position comes from the script (it measures the real
-// rendered image box); here we only say it is plain text in the margin.
-.gv.gv-has-note.gv-note-gutter .gv-note {
-  display: block;
+// rendered image box). The note, if any, just sits inline below the chips
+// -- there's normally room, so no collapse/expand needed here.
+.gv.gv-info-gutter .gv-info.is-current {
+  .gv-note-toggle { display: none; }
+  .gv-note-text { max-height: none; }
 }
 
-// Dropdown mode: the script anchors this panel's top/left/width to the
-// image's own measured bottom edge (never the raw viewport edge -- that
-// mismatch was a real bug, not a style choice). It sits entirely in the
-// existing bottom margin below the photo, so it never overlays the image at
-// all; the gradient is there purely so the panel reads as one considered
-// object growing out of the black, not a hard-edged box appearing from
-// nowhere. "Pops" open by growing, the same way an Instagram caption sheet
-// expands, rather than a plain opacity fade.
-.gv.gv-has-note.gv-note-drop {
-  .gv-note {
+// Dropdown mode: only the note portion collapses -- the title/chip-list
+// content stays fully visible always. The script anchors this panel's
+// top/left/width to the image's own measured bottom edge (never the raw
+// viewport edge), so it sits entirely in the existing margin below the
+// photo and never overlays it. The gradient exists ONLY here, on the note
+// text specifically, never on the chip list/title block and never in
+// gutter mode -- it is the one narrow exception, not a general effect.
+.gv.gv-info-drop .gv-info.is-current {
+  .gv-note-text {
     @include transition(max-height .22s ease);
     max-height: 0;
+    margin-top: 0;
     padding: 0 .2rem;
     overflow: hidden;
     background: linear-gradient(to bottom, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 85%);
     @include box-sizing;
   }
 
-  .gv-note-toggle {
+  &:has(.gv-note-text) .gv-note-toggle {
     display: flex;
   }
+}
 
+// .gv-info-open lives on the root (.gv), not on .gv-info -- one delegated
+// click listener toggles it there, since it's a viewer-wide "is the drop
+// panel open" state, not a per-panel one (only one panel is ever current).
+.gv.gv-info-drop.gv-info-open .gv-info.is-current {
   // ~4 lines at the note's own line-height, plus a little breathing room --
   // an approximation, not a computed value; loosen it if a real 4-line note
   // ever looks clipped.
-  &.gv-note-open .gv-note {
+  .gv-note-text {
     max-height: 6rem;
+    margin-top: .5em;
     padding: .5rem .2rem;
   }
 
-  // The same tiny arrow collapses it, now pointing up.
-  &.gv-note-open .gv-note-tri {
+  .gv-note-tri {
     transform: rotate(180deg);
   }
 }
 
 /* ------------------------------------------------- platform adaptations */
 
-// Phone: the close cluster moves to a bottom corner. Top corners are a known
-// bad spot for one-handed reach; the metadata line takes the row above it,
-// and the note toggle mirrors it in the opposite bottom corner.
+// Phone: the close cluster moves to a bottom corner (top corners are a
+// known bad spot for one-handed reach). The info panel just gets smaller
+// and narrower -- its placement logic (gutter vs. drop) is unchanged and
+// naturally resolves to "drop" here anyway, since a phone rarely has a
+// usable side gutter regardless of photo orientation.
 @media (max-width: 40em) {
   .gv-slide {
     padding: 5vh 7vw 14vh;
@@ -371,7 +381,7 @@ body:has(.gv) {
   // triangle must not.
   .gv-nav {
     width: 7vw;
-    min-width: 64px;     // was the 44px accessibility floor -- too easy to miss
+    min-width: 88px;     // was the 44px accessibility floor, then 64px -- still too easy to miss
   }
 
   .gv-nav--prev {
@@ -390,15 +400,9 @@ body:has(.gv) {
     padding: .5rem .9rem 1rem;
   }
 
-  .gv-meta {
-    bottom: 4.2rem;
-    width: calc(100% - 2rem);
-    font-size: .66rem;
-  }
-
-  .gv-note-toggle {
-    left: .4rem;
-    bottom: .5rem;
+  .gv-info {
+    max-width: 200px;
+    font-size: .62rem;
   }
 }
 
@@ -406,7 +410,7 @@ body:has(.gv) {
   .gv-strip,
   .gv-tri,
   .gv-controls,
-  .gv-note,
+  .gv-note-text,
   .gv-note-tri,
   .gv-note-toggle {
     transition: none !important;

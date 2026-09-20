@@ -26,24 +26,17 @@
   var slides = Array.prototype.slice.call(root.querySelectorAll('.gv-slide'));
   if (!strip || !slides.length) { return; }
 
-  var metaBox    = document.getElementById('gv-meta');
-  var noteBox    = document.getElementById('gv-note');
-  var noteText   = noteBox.querySelector('.gv-note-text');
-  var noteToggle = root.querySelector('.gv-note-toggle');
   var prevBtn    = root.querySelector('.gv-nav--prev');
   var nextBtn    = root.querySelector('.gv-nav--next');
   var closeLink  = root.querySelector('.gv-close');
   var titleBtn   = document.getElementById('gv-title-reveal');
   var titleEl    = root.querySelector('.gallery-title');
 
-  var coverMeta = root.dataset.coverMeta || '';
-  var coverNote = root.dataset.coverNote || '';
-
   var SETTING_KEY   = 'gv:title-reveal';
-  var TITLE_FALLBACK_MS = 3000;  // reduced-motion only: hold, no animated fade
+  var TITLE_FALLBACK_MS = 2000;  // reduced-motion only: hold, no animated fade
   var FADE_MS       = 160;       // half of the crossfade
   var EDGE_FRAC     = 0.18;      // how close to an edge counts as "approaching" it
-  var NOTE_MIN_W    = 230;       // px of *usable* gutter needed to host the note
+  var INFO_MIN_W    = 230;       // px of *usable* gutter needed to host the panel there
 
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   var current = 0;
@@ -124,67 +117,67 @@
     titleEl.style.fontSize = size + 'px';
   }
 
-  /* ----------------------------------------------------------------- note */
+  /* ------------------------------------------------------------ info panel */
 
-  // The cover (slide 0) shows the gallery's own description instead of that
-  // photo's note -- same field, same rules, just a different source.
-  function noteFor(i) {
-    if (i === 0) { return coverNote; }
-    return slides[i].getAttribute('data-note') || '';
+  // The single source of truth for "which slide's panel is showing" -- each
+  // .gv-slide carries its own pre-rendered .gv-info (a chip list for a real
+  // photo, a labeled block for the cover/its duplicate); this just decides
+  // which one is current and where it sits. Metadata/title content is never
+  // hidden; only the optional note text (if any) ever collapses, and only
+  // when there's no gutter room for it.
+  function currentInfo() {
+    return slides[current] ? slides[current].querySelector('.gv-info') : null;
   }
 
-  // Adaptive placement: the side gutter when one is wide enough (a portrait
-  // photo on a wide screen), otherwise the tap-to-expand dropdown that
-  // overlays the bottom of the photo behind a gradient.
-  function placeNote() {
-    var note = noteFor(current);
-    var has  = !!(note && note.trim());
-    root.classList.toggle('gv-has-note', has);
-    if (noteText) { noteText.textContent = note || ''; }
-    if (!has) { collapseNote(); return; }
+  function placeInfo() {
+    var prev = root.querySelector('.gv-info.is-current');
+    if (prev && prev !== currentInfo()) {
+      prev.classList.remove('is-current');
+      root.classList.remove('gv-info-open');
+    }
+    var info = currentInfo();
+    if (!info) { return; }
+    info.classList.add('is-current');
 
     // Usable gutter = the space beside the photo, less the breathing room
-    // and the edge zone the next-triangle lives in. Wide enough, and the
-    // note goes there; otherwise it becomes the tap-to-expand dropdown.
+    // and the edge zone the next-triangle lives in (read live from the DOM,
+    // so widening .gv-nav in CSS never needs a matching hardcoded number
+    // here). Wide enough, and the panel goes there; otherwise it drops
+    // below the photo.
     var img  = slides[current].querySelector('img');
     var rect = img ? img.getBoundingClientRect() : null;
     var zone = nextBtn ? nextBtn.getBoundingClientRect().width : 0;
     var gutter = rect && rect.width ? (root.clientWidth - rect.width) / 2 : 0;
     var usable = gutter - 24 - zone;
-    var inGutter = usable >= NOTE_MIN_W;
-    root.classList.toggle('gv-note-gutter', inGutter);
-    root.classList.toggle('gv-note-drop', !inGutter);
+    var inGutter = usable >= INFO_MIN_W;
+    root.classList.toggle('gv-info-gutter', inGutter);
+    root.classList.toggle('gv-info-drop', !inGutter);
+    if (inGutter) { root.classList.remove('gv-info-open'); }
 
+    if (!rect) { return; }
     if (inGutter) {
-      collapseNote();                       // the toggle is irrelevant here
-      noteBox.style.left   = (rect.right + 24) + 'px';
-      noteBox.style.top    = rect.top + 'px';
-      noteBox.style.bottom = '';
+      info.style.left   = (rect.right + 24) + 'px';
+      info.style.top    = rect.top + 'px';
+      info.style.width  = '';
     } else {
       // "One line below the image": anchor to the image's own measured
-      // bottom edge, not the viewport's. This is the same rule gutter mode
-      // already follows -- one placement code path, not two, so there is no
-      // way for one of them to silently drift out of sync with the other.
-      noteBox.style.left   = rect.left + 'px';
-      noteBox.style.width  = rect.width + 'px';
-      noteBox.style.top    = (rect.bottom + 8) + 'px';
-      noteBox.style.bottom = '';
+      // bottom edge, not the viewport's -- the same rule gutter mode
+      // already follows, one placement code path for both.
+      info.style.left   = rect.left + 'px';
+      info.style.width  = rect.width + 'px';
+      info.style.top    = (rect.bottom + 8) + 'px';
     }
   }
 
-  function collapseNote() {
-    root.classList.remove('gv-note-open');
-    if (noteToggle) {
-      noteToggle.setAttribute('aria-expanded', 'false');
-      noteToggle.setAttribute('aria-label', 'Show note');
-    }
-  }
-
-  function toggleNote() {
-    var open = root.classList.toggle('gv-note-open');
-    noteToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    noteToggle.setAttribute('aria-label', open ? 'Hide note' : 'Show note');
-  }
+  // Delegated, not bound per-panel: N slides each have their own toggle
+  // button, but there is only ever one listener to manage.
+  root.addEventListener('click', function (ev) {
+    var toggle = ev.target.closest && ev.target.closest('.gv-note-toggle');
+    if (!toggle) { return; }
+    var open = root.classList.toggle('gv-info-open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Hide note' : 'Show note');
+  });
 
   /* ------------------------------------------------------------ nav marks */
 
@@ -232,8 +225,7 @@
     var i = indexFromScroll();
     var changed = i !== current;
     current = i;
-    if (metaBox) { metaBox.textContent = (i === 0 ? coverMeta : slides[i].getAttribute('data-meta')) || ''; }
-    placeNote();
+    placeInfo();
     updateTitleMode();
     positionTitle();
     if (changed || navigated) { flashTitleForSlide(i); }
@@ -268,7 +260,6 @@
 
   if (prevBtn) { prevBtn.addEventListener('click', function () { go(-1); }); }
   if (nextBtn) { nextBtn.addEventListener('click', function () { go(1); }); }
-  if (noteToggle) { noteToggle.addEventListener('click', toggleNote); }
 
   if (titleBtn) {
     loadSetting();
@@ -337,7 +328,7 @@
 
   window.addEventListener('resize', function () {
     strip.scrollLeft = current * strip.clientWidth;
-    placeNote();
+    placeInfo();
     positionTitle();
   });
 
