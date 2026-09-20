@@ -31,19 +31,19 @@
   var prevBtn    = root.querySelector('.gv-nav--prev');
   var nextBtn    = root.querySelector('.gv-nav--next');
   var closeBtn   = root.querySelector('.gv-close');
-  var setting    = document.getElementById('gv-title-reveal');
+  var titleBtn   = document.getElementById('gv-title-reveal');
   var titleEl    = root.querySelector('.gallery-title');
 
-  var SETTING_KEY = 'gv:title-reveal';
-  var TITLE_HOLD  = 2000;   // spec: hold the reveal exactly 2s per navigation
-  var FADE_MS     = 160;    // half of the crossfade
-  var EDGE_FRAC   = 0.18;   // how close to an edge counts as "approaching" it
-  var NOTE_MIN_W  = 230;    // px of *usable* gutter needed to host the note
+  var SETTING_KEY   = 'gv:title-reveal';
+  var TITLE_FALLBACK_MS = 3000;  // reduced-motion only: hold, no animated fade
+  var FADE_MS       = 160;       // half of the crossfade
+  var EDGE_FRAC     = 0.18;      // how close to an edge counts as "approaching" it
+  var NOTE_MIN_W    = 230;       // px of *usable* gutter needed to host the note
 
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   var current = 0;
   var opened  = false;
-  var titleTimer = null;
+  var titleFallbackTimer = null;
   var markTimers = {};
   var rafPending = false;
   var lastFocus  = null;
@@ -56,34 +56,45 @@
   /* ---------------------------------------------------------------- state */
 
   function titleEnabled() {
-    return !!(setting && setting.checked);
+    return !!(titleBtn && titleBtn.getAttribute('aria-pressed') === 'true');
   }
 
   function loadSetting() {
-    if (!setting) { return; }
+    if (!titleBtn) { return; }
     var stored = null;
     try { stored = window.localStorage.getItem(SETTING_KEY); } catch (e) { /* private mode */ }
-    setting.checked = stored === null ? true : stored === '1';   // default: on
+    setTitleEnabled(stored === null ? true : stored === '1');   // default: on
   }
 
-  function saveSetting() {
-    try { window.localStorage.setItem(SETTING_KEY, setting.checked ? '1' : '0'); } catch (e) { /* ignore */ }
+  function setTitleEnabled(on) {
+    titleBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    titleBtn.setAttribute('aria-label', 'Title reveal ' + (on ? 'on' : 'off') + ' (T)');
+    try { window.localStorage.setItem(SETTING_KEY, on ? '1' : '0'); } catch (e) { /* ignore */ }
   }
 
   /* ---------------------------------------------------------------- title */
 
-  function showTitle(hold) {
+  // One fixed timeline, always: instant at full opacity, then a linear fade
+  // starting partway through. The whole curve lives in the CSS keyframe
+  // (_gallery-title.scss) -- this function only (re)starts it. Restarting an
+  // already-finished CSS animation needs the class removed and the element
+  // reflowed before re-adding it, or the browser treats it as a no-op.
+  function flashTitle() {
     if (!titleEl || !titleEnabled()) { return; }
-    window.clearTimeout(titleTimer);
     positionTitle();
+    window.clearTimeout(titleFallbackTimer);
+    titleEl.classList.remove('is-revealed');
+    void titleEl.offsetWidth;   // force reflow so the animation restarts
     titleEl.classList.add('is-revealed');
-    if (hold) {
-      titleTimer = window.setTimeout(hideTitle, TITLE_HOLD);
+    if (reduced.matches) {
+      // The CSS animation is suppressed under reduced motion (see the media
+      // query), so this is the only thing that ever removes the class there.
+      titleFallbackTimer = window.setTimeout(hideTitle, TITLE_FALLBACK_MS);
     }
   }
 
   function hideTitle() {
-    window.clearTimeout(titleTimer);
+    window.clearTimeout(titleFallbackTimer);
     if (titleEl) { titleEl.classList.remove('is-revealed'); }
   }
 
@@ -130,13 +141,18 @@
 
     if (inGutter) {
       collapseNote();                       // the toggle is irrelevant here
-      noteBox.style.left  = (rect.right + 24) + 'px';
-      noteBox.style.width = Math.min(usable, 640) + 'px';
-      noteBox.style.top   = rect.top + 'px';
+      noteBox.style.left   = (rect.right + 24) + 'px';
+      noteBox.style.top    = rect.top + 'px';
+      noteBox.style.bottom = '';
     } else {
-      noteBox.style.left = '';
-      noteBox.style.width = '';
-      noteBox.style.top = '';
+      // "One line below the image": anchor to the image's own measured
+      // bottom edge, not the viewport's. This is the same rule gutter mode
+      // already follows -- one placement code path, not two, so there is no
+      // way for one of them to silently drift out of sync with the other.
+      noteBox.style.left   = rect.left + 'px';
+      noteBox.style.width  = rect.width + 'px';
+      noteBox.style.top    = (rect.bottom + 8) + 'px';
+      noteBox.style.bottom = '';
     }
   }
 
@@ -189,7 +205,7 @@
     if (metaBox) { metaBox.textContent = slides[i].getAttribute('data-meta') || ''; }
     placeNote();
     positionTitle();
-    if (changed || navigated) { showTitle(true); }
+    if (changed || navigated) { flashTitle(); }
     if (prevBtn) { prevBtn.disabled = i === 0; }
     if (nextBtn) { nextBtn.disabled = i === slides.length - 1; }
   }
@@ -276,20 +292,22 @@
   if (closeBtn) { closeBtn.addEventListener('click', close); }
   if (noteToggle) { noteToggle.addEventListener('click', toggleNote); }
 
-  if (setting) {
+  if (titleBtn) {
     loadSetting();
-    setting.addEventListener('change', function () {
-      saveSetting();
-      if (setting.checked) { showTitle(true); } else { hideTitle(); }
+    titleBtn.addEventListener('click', function () {
+      var on = !titleEnabled();
+      setTitleEnabled(on);
+      if (on) { flashTitle(); } else { hideTitle(); }
     });
   }
 
   // Keyboard is bound to the viewer's own root, never to document, so it
-  // can't hijack arrow keys anywhere else on the page.
+  // can't hijack keys anywhere else on the page.
   root.addEventListener('keydown', function (ev) {
     if (ev.key === 'ArrowLeft')  { ev.preventDefault(); go(-1); }
     else if (ev.key === 'ArrowRight') { ev.preventDefault(); go(1); }
     else if (ev.key === 'Escape') { ev.preventDefault(); close(); }
+    else if (ev.key === 't' || ev.key === 'T') { ev.preventDefault(); titleBtn && titleBtn.click(); }
   });
 
   // Proximity reveal: the mark fades in only as the cursor nears that edge.
@@ -317,16 +335,16 @@
     });
   });
 
-  // Hover over the stage reveals the title; leaving hides it again.
+  // Hovering the stage (mouse) or tapping the photo (touch) both play the
+  // same fixed-timeline flash -- one trigger path, not a hover-mode and a
+  // tap-mode with different hold behavior. Tapping the black around the
+  // photo closes (inherited from the original <details> click-outside
+  // behavior).
   strip.addEventListener('pointerenter', function (ev) {
-    if (ev.pointerType === 'touch') { return; }
-    showTitle(false);
+    if (ev.pointerType !== 'touch') { flashTitle(); }
   });
-
-  // Tap/click on the photo reveals the title; on the black around it, closes
-  // (inherited from the original <details> click-outside behavior).
   strip.addEventListener('click', function (ev) {
-    if (ev.target.tagName === 'IMG') { showTitle(true); }
+    if (ev.target.tagName === 'IMG') { flashTitle(); }
     else { close(); }
   });
 

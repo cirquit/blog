@@ -52,15 +52,20 @@ formatting.
   </button>
 
   {%- comment -%}
-  Close + the title-reveal setting, deliberately grouped: the checkbox sits
-  with close (not with the title) to read as a generic viewer preference
-  rather than per-image chrome.
+  Close + the title-reveal toggle, deliberately grouped: it sits with close
+  (not with the title) to read as a generic viewer preference rather than
+  per-image chrome. A "T" means the reveal is on; a slash through it means
+  off -- one glyph, two states, no separate label needed. Press T to toggle
+  from the keyboard.
   {%- endcomment -%}
   <div class="gv-controls">
-    <label class="gv-setting">
-      <input type="checkbox" class="gv-setting-input" id="gv-title-reveal" checked>
-      <span class="gv-setting-label">title</span>
-    </label>
+    <button type="button" class="gv-title-toggle" id="gv-title-reveal"
+            aria-pressed="true" aria-label="Title reveal on (T)">
+      <svg class="gv-title-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 6h16M12 6v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line class="gv-title-icon-slash" x1="3" y1="21" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
     <button type="button" class="gv-close" aria-label="Close viewer">
       <span aria-hidden="true">&times;</span>
     </button>

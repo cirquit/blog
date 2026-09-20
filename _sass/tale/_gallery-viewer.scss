@@ -188,25 +188,40 @@ html.gv-js .photo-lightbox-full {
   }
 }
 
-.gv-setting {
+// One glyph, two states: a "T" means the reveal is on, the same "T" with a
+// diagonal slash through it means off. No separate text label needed.
+.gv-title-toggle {
   display: flex;
   align-items: center;
-  gap: .35rem;
-  min-height: 44px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
   color: rgba(255, 255, 255, .8);
-  font-family: $mono-cm;
-  font-size: .7rem;
-  letter-spacing: .04em;
   cursor: pointer;
-  user-select: none;
+
+  &:hover, &:focus-visible { color: #fff; }
+
+  &:focus-visible {
+    outline: 1px solid rgba(255, 255, 255, .5);
+    outline-offset: -6px;
+  }
 }
 
-.gv-setting-input {
-  width: 12px;
-  height: 12px;
-  margin: 0;
-  accent-color: #fff;
-  cursor: pointer;
+.gv-title-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.gv-title-icon-slash {
+  @include transition(opacity .15s ease);
+  opacity: 0;
+}
+
+.gv-title-toggle[aria-pressed="false"] .gv-title-icon-slash {
+  opacity: 1;
 }
 
 /* ------------------------------------------------------- metadata line */
@@ -251,11 +266,14 @@ html.gv-js .photo-lightbox-full {
 
   .gv-note-text {
     margin: 0;
-    max-width: 80ch;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;                 // up to 4 lines, plain text
-    -webkit-box-orient: vertical;
+    max-width: 60ch;                       // literal 60ch: meaningful because monospace
+    max-height: 4 * 1.5em;                 // up to 4 lines, plain text
     overflow: hidden;
+    // A hard 4th-line clip reads as a bug. Dissolving the last few pixels
+    // into the black background instead makes any overflow read as a
+    // deliberate part of the negative space, not a cutoff.
+    -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
   }
 }
 
@@ -295,26 +313,27 @@ html.gv-js .photo-lightbox-full {
   display: none;
 }
 
-// Gutter mode: position/size come from the script (it measures the real
+// Gutter mode: position comes from the script (it measures the real
 // rendered image box); here we only say it is plain text in the margin.
 .gv.gv-has-note.gv-note-gutter .gv-note {
   display: block;
-  bottom: auto;
-  right: auto;
 }
 
-// Dropdown mode: overlays the bottom of the photo behind a gradient that
-// fades from the black background to fully transparent -- enough contrast
-// to read without a hard-edged box.
+// Dropdown mode: the script anchors this panel's top/left/width to the
+// image's own measured bottom edge (never the raw viewport edge -- that
+// mismatch was a real bug, not a style choice). It sits entirely in the
+// existing bottom margin below the photo, so it never overlays the image at
+// all; the gradient is there purely so the panel reads as one considered
+// object growing out of the black, not a hard-edged box appearing from
+// nowhere. "Pops" open by growing, the same way an Instagram caption sheet
+// expands, rather than a plain opacity fade.
 .gv.gv-has-note.gv-note-drop {
   .gv-note {
-    @include transition(opacity .18s ease);
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 4.5rem 1.4rem calc(#{$gv-inset-bottom} + 1.2rem);
-    background: linear-gradient(to top, rgba(0, 0, 0, .92) 45%, rgba(0, 0, 0, 0) 100%);
-    opacity: 0;
+    @include transition(max-height .22s ease);
+    max-height: 0;
+    padding: 0 .2rem;
+    overflow: hidden;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 85%);
     @include box-sizing;
   }
 
@@ -322,8 +341,12 @@ html.gv-js .photo-lightbox-full {
     display: flex;
   }
 
+  // ~4 lines at the note's own line-height, plus a little breathing room --
+  // an approximation, not a computed value; loosen it if a real 4-line note
+  // ever looks clipped.
   &.gv-note-open .gv-note {
-    opacity: 1;
+    max-height: 6rem;
+    padding: .5rem .2rem;
   }
 
   // The same tiny arrow collapses it, now pointing up.
@@ -370,10 +393,6 @@ html.gv-js .photo-lightbox-full {
     bottom: 4.2rem;
     width: calc(100% - 2rem);
     font-size: .66rem;
-  }
-
-  .gv.gv-has-note.gv-note-drop .gv-note {
-    padding-bottom: 6rem;
   }
 
   .gv-note-toggle {

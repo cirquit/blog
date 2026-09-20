@@ -25,6 +25,17 @@
       font-style: normal; font-weight: 700; font-display: swap;
       src: url({{ "/assets/fonts/libre-baskerville-700.woff2" | relative_url }}) format('woff2');
     }
+    {%- comment -%}
+    Latin Modern Mono: the real, freely-licensed (GUST Font License / LPPL)
+    outline descendant of Knuth's Computer Modern Typewriter -- not preloaded,
+    since it's only used inside the gallery viewer, not above-the-fold body
+    text. font-display: swap means a gallery page never blocks on it.
+    {%- endcomment -%}
+    @font-face {
+      font-family: 'Latin Modern Mono';
+      font-style: normal; font-weight: 400; font-display: swap;
+      src: url({{ "/assets/fonts/latin-modern-mono-400.woff2" | relative_url }}) format('woff2');
+    }
     {{ "@import 'tale';" | scssify }}
   </style>
 

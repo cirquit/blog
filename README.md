@@ -263,7 +263,13 @@ When ready to go live:
 
 Already done, don't undo:
 
-- Font self-hosted (`assets/fonts/`), `font-display: swap`, 400 weight preloaded.
+- Fonts self-hosted (`assets/fonts/`), `font-display: swap`, body weight
+  preloaded. The gallery viewer's monospace face (metadata line, note) is
+  **Latin Modern Mono** — the real, freely-licensed (GUST Font
+  License/LPPL) outline descendant of Knuth's Computer Modern Typewriter,
+  from the official [CTAN `lm` package](https://ctan.org/pkg/lm), converted
+  to woff2 with [fontTools](https://github.com/fonttools/fonttools). Not
+  preloaded, since it's only needed on gallery pages, not above-the-fold text.
 - Full CSS inlined into `<head>` — zero render-blocking requests.
 - `favicon.ico` is a 1.4 KB PNG-in-ICO.
 - No JavaScript anywhere **except** `assets/js/gallery-viewer.js` (~12 KB,
@@ -274,11 +280,5 @@ Already done, don't undo:
   second script, and don't load this one anywhere else.
 
 First load: ~25 KB, one domain, one request on the critical path (a gallery
-page adds the one deferred script, off the critical path).
-
-Known follow-up: the viewer's metadata line asks for Computer Modern
-Typewriter, but no woff2 of it is self-hosted yet, so `$mono-cm` in
-`_sass/tale/_variables.scss` currently falls through to the reader's own
-CM-flavored face and then to a system monospace. Self-host it the same way
-Libre Baskerville already is (drop the woff2 in `assets/fonts/`, add an
-`@font-face` in `_includes/head.html`) to finish the intended look.
+page adds the one deferred script plus the mono font, both off the
+critical path).

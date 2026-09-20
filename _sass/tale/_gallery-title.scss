@@ -9,16 +9,28 @@
 
 // Shared scaffolding: every preset is a positioned, fully-transparent layer
 // over the current photo. The script positions it against the image's own
-// rendered box and toggles `.is-revealed`.
+// rendered box and (re)plays this animation by toggling `.is-revealed`.
+//
+// The whole timeline lives here, in one place, as one curve: instant at full
+// opacity (0%), held (0%-60%), then a plain linear fade to nothing (60%-100%
+// of 5s = the 3s-5s window). JS never manages a hold timer for this -- it
+// only starts and stops the animation.
+@keyframes gallery-title-flash {
+  0%   { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .gallery-title {
   position: absolute;
   z-index: 2001;
   display: flex;
   pointer-events: none;
   opacity: 0;
-  @include transition(opacity .45s ease);
 
-  &.is-revealed { opacity: 1; }
+  &.is-revealed {
+    animation: gallery-title-flash 5s linear forwards;
+  }
 }
 
 // The inert default: a gallery with no (or an unknown) `title_style` draws
@@ -37,16 +49,16 @@
 .gallery-title--magazine {
   align-items: flex-end;
 
+  // Opacity is the only thing that ever animates here -- the scrim and text
+  // simply inherit it from the parent `.gallery-title`'s own opacity, so
+  // neither needs (or has) an animation of its own to stay in sync.
   .gallery-title-scrim {
-    @include transition(opacity .45s ease);
     position: absolute;
     inset: 0;
     background: linear-gradient(to top, rgba(0, 0, 0, .68) 0%, rgba(0, 0, 0, 0) 100%);
   }
 
   .gallery-title-text {
-    @include transition(transform .45s ease);
-    position: relative;
     display: block;
     width: 100%;
     padding: 0 .5em .35em;
@@ -57,23 +69,17 @@
     line-height: 1.02;              // image's own width, so it fits the photo
     letter-spacing: -.02em;
     text-transform: uppercase;
-    transform: translateY(6px);
     @include box-sizing;
-  }
-
-  &.is-revealed .gallery-title-text {
-    transform: translateY(0);
   }
 }
 
+// The animation is instant-then-linear by design, which already has no
+// "motion" to speak of beyond the opacity change itself -- but reduced
+// motion means no animated fade at all, so JS switches to a plain
+// hold-then-remove-the-class timer (see TITLE_FALLBACK_MS) instead.
 @media (prefers-reduced-motion: reduce) {
-  .gallery-title,
-  .gallery-title--magazine .gallery-title-scrim,
-  .gallery-title--magazine .gallery-title-text {
-    transition: none !important;
-  }
-
-  .gallery-title--magazine .gallery-title-text {
-    transform: none;
+  .gallery-title.is-revealed {
+    animation: none;
+    opacity: 1;
   }
 }
