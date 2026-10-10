@@ -4,46 +4,31 @@
 
   {% seo %}
 
-  <!-- Preload the font that renders body text -->
   <link rel="preload" as="font" type="font/woff2" crossorigin
-        href="{{ "/assets/fonts/libre-baskerville-400.woff2" | relative_url }}">
+        href="{{ "/assets/fonts/source-serif-4-400.woff2" | relative_url }}">
 
-  <!-- Styles: self-hosted font + theme CSS, inlined to avoid render-blocking requests -->
   <style>
     @font-face {
-      font-family: 'Libre Baskerville';
+      font-family: 'Source Serif 4';
       font-style: normal; font-weight: 400; font-display: swap;
-      src: url({{ "/assets/fonts/libre-baskerville-400.woff2" | relative_url }}) format('woff2');
+      src: url({{ "/assets/fonts/source-serif-4-400.woff2" | relative_url }}) format('woff2');
     }
     @font-face {
-      font-family: 'Libre Baskerville';
+      font-family: 'Source Serif 4';
       font-style: italic; font-weight: 400; font-display: swap;
-      src: url({{ "/assets/fonts/libre-baskerville-400italic.woff2" | relative_url }}) format('woff2');
+      src: url({{ "/assets/fonts/source-serif-4-400italic.woff2" | relative_url }}) format('woff2');
     }
     @font-face {
-      font-family: 'Libre Baskerville';
-      font-style: normal; font-weight: 700; font-display: swap;
-      src: url({{ "/assets/fonts/libre-baskerville-700.woff2" | relative_url }}) format('woff2');
+      font-family: 'Source Serif 4';
+      font-style: normal; font-weight: 600; font-display: swap;
+      src: url({{ "/assets/fonts/source-serif-4-600.woff2" | relative_url }}) format('woff2');
     }
-    {%- comment -%}
-    Latin Modern Mono: the real, freely-licensed (GUST Font License / LPPL)
-    outline descendant of Knuth's Computer Modern Typewriter -- not preloaded,
-    since it's only used inside the gallery viewer, not above-the-fold body
-    text. font-display: swap means a gallery page never blocks on it.
-    {%- endcomment -%}
-    @font-face {
-      font-family: 'Latin Modern Mono';
-      font-style: normal; font-weight: 400; font-display: swap;
-      src: url({{ "/assets/fonts/latin-modern-mono-400.woff2" | relative_url }}) format('woff2');
-    }
-    {{ "@import 'tale';" | scssify }}
+    {{ "@import 'main';" | scssify }}
   </style>
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="{{ "/assets/favicon-32x32.png" | relative_url }}">
   <link rel="icon" type="image/png" sizes="16x16" href="{{ "/assets/favicon-16x16.png" | relative_url }}">
   <link rel="apple-touch-icon" sizes="180x180" href="{{ "/assets/apple-touch-icon.png" | relative_url }}">
 
-  <!-- RSS -->
   {% feed_meta %}
 </head>

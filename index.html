@@ -1,4 +1,18 @@
 ---
-layout: home
-title: Home
+layout: default
+title: Writing
 ---
+<ul class="posts">
+  {%- for post in paginator.posts %}
+  <li>
+    <time class="meta" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%B %-d, %Y" }}</time>
+    <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    {%- if post.description %}<p class="excerpt">{{ post.description }}</p>{% endif %}
+  </li>
+  {%- endfor %}
+</ul>
+
+<p class="pager meta">
+  {%- if paginator.previous_page %}<a href="{{ paginator.previous_page_path | relative_url }}">← newer</a>{% endif %}
+  {%- if paginator.next_page %}<a href="{{ paginator.next_page_path | relative_url }}">older →</a>{% endif %}
+</p>

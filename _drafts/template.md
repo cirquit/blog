@@ -2,7 +2,6 @@
 layout: post
 title: "TITLE HERE"
 date: 2026-01-01 12:00:00 +0000
-tags: []
 ---
 
 Write the post in Markdown here.
@@ -21,12 +20,9 @@ Write the post in Markdown here.
 -->
 
 <!--
-  PHOTO INLINE (optional) — run scripts/make-photo.sh first (adds a
-  `photos.<slug>` entry to THIS post's front matter), see README §5:
+  PHOTO INLINE (optional):
 
-  {% include photo.html slug="beach-01" lightbox=true %}
-
-  Drop `lightbox` for a plain sized-to-post photo.
+  {% include photo.html src="/assets/photos/foo.webp" alt="Alt text" caption="Optional caption" %}
 -->
 
 <!--

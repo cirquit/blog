@@ -1,0 +1,42 @@
+---
+layout: default
+---
+{%- assign photos = site.photos | where: "gallery", page.gallery | sort: "path" -%}
+{%- for p in photos %}{% if p.url == page.url %}{% assign idx = forloop.index0 %}{% endif %}{% endfor -%}
+{%- assign prev_idx = idx | minus: 1 -%}
+{%- assign next_idx = idx | plus: 1 -%}
+{%- if idx > 0 %}{% assign prev = photos[prev_idx] %}{% endif -%}
+{%- assign next = photos[next_idx] -%}
+{%- assign gal = site.galleries | where: "slug", page.gallery | first -%}
+{%- assign note = page.note | strip -%}
+{%- assign iso = page.iso | append: "" | strip -%}
+{%- assign place = page.place | strip -%}
+{%- assign camera = page.camera | strip -%}
+{%- assign lens = page.lens | strip -%}
+{%- assign exposure = page.focal_length | append: " " | append: page.aperture | append: " " | append: page.shutter -%}
+{%- if iso != "" %}{% assign exposure = exposure | append: " ISO " | append: iso %}{% endif -%}
+{%- assign exposure = exposure | strip | normalize_whitespace -%}
+{%- assign parts = "" | split: "" -%}
+{%- if place != "" %}{% assign parts = parts | push: place %}{% endif -%}
+{%- if camera != "" %}{% assign parts = parts | push: camera %}{% endif -%}
+{%- if lens != "" %}{% assign parts = parts | push: lens %}{% endif -%}
+{%- if exposure != "" %}{% assign parts = parts | push: exposure %}{% endif -%}
+<figure class="photo">
+  <div class="stage">
+    <img src="{{ page.image | relative_url }}" alt="{{ page.alt }}">
+    {%- if prev %}<a class="zone prev" href="{{ prev.url | relative_url }}" rel="prev" aria-label="Previous photo"></a>{% endif %}
+    {%- if next %}<a class="zone next" href="{{ next.url | relative_url }}" rel="next" aria-label="Next photo"></a>{% endif %}
+  </div>
+  <figcaption>
+    {%- if note != "" %}<p class="note">{{ note }}</p>{% endif %}
+    {%- if parts.size > 0 %}<p class="meta">{{ parts | join: " · " }}</p>{% endif %}
+    {%- assign body = content | strip %}
+    {%- if body != "" %}<div class="comment">{{ body }}</div>{% endif %}
+  </figcaption>
+</figure>
+<nav class="photo-nav text">
+  {%- if prev %}<a href="{{ prev.url | relative_url }}" rel="prev">← prev</a>{% else %}<span></span>{% endif %}
+  <span>{{ idx | plus: 1 }} / {{ photos.size }}</span>
+  {%- if next %}<a href="{{ next.url | relative_url }}" rel="next">next →</a>{% else %}<span></span>{% endif %}
+</nav>
+<p class="back text meta"><a href="{{ gal.url | default: '/galleries/' | relative_url }}">{{ gal.title | default: 'All galleries' }}</a></p>

@@ -1,26 +1,10 @@
 {%- comment -%}
-Inline photo for a normal post. No JavaScript, no external requests.
+Inline photo for a normal post. No JavaScript.
 Usage:
-  {% include photo.html slug="beach-01" lightbox=true %}
-`slug` is required and looks up page.photos[slug] -- a front-matter entry
-on THIS post (basename, alt, note, exif), written by scripts/make-photo.sh
-when you run it against this post's file. The photo doesn't need to be
-part of any gallery; it's tied only to this post.
-
-`lightbox: true` makes it click-to-enlarge (thumbnail + full-screen CSS-only
-overlay with EXIF/note); the default renders the full-size derivative
-directly, sized to the post's content width.
+  {% include photo.html src="/assets/photos/foo.webp" alt="Alt text" caption="Optional caption" %}
+Only `src` is required.
 {%- endcomment -%}
-{% if include.lightbox %}
-  {% include photo-lightbox-item.html slug=include.slug %}
-{% else %}
-  {%- assign meta = page.photos[include.slug] -%}
-  {%- assign base = meta.basename | prepend: '/' | prepend: site.baseurl -%}
-<figure class="photo-figure">
-  <picture>
-    <source srcset="{{ base }}-full.avif" type="image/avif">
-    <img src="{{ base }}-full.webp" alt="{{ meta.alt }}" loading="lazy" decoding="async" class="photo-img">
-  </picture>
-  {% if meta.note != "" %}<figcaption class="photo-caption">{{ meta.note }}</figcaption>{% endif %}
+<figure class="photo-inline">
+  <img src="{{ include.src | relative_url }}" alt="{{ include.alt }}" loading="lazy">
+  {%- if include.caption %}<figcaption>{{ include.caption }}</figcaption>{% endif %}
 </figure>
-{% endif %}

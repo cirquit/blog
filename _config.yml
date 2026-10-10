@@ -20,15 +20,24 @@ baseurl:        "/blog"                        # subpath. "/blog" for cirquit.gi
 # ─────────────────────────────────────────────────────────────
 markdown:       kramdown
 permalink:      /:year-:month-:day/:title      # post URL shape, e.g. /2026-09-06/hello
-paginate:       5                              # posts per page on the home page
+paginate:       5                              # posts per page on /blog/ (the home page)
 
 include:
   - _pages
 
 collections:
   galleries:
-    output: true                               # each gallery gets its own page, e.g. /galleries/summer-2026/
+    output: true                               # _galleries/<slug>.md  ->  /galleries/<slug>/
     permalink: /galleries/:path/
+  photos:
+    output: true                               # _photos/<slug>/<NN>.md  ->  /galleries/<slug>/<NN>/
+    permalink: /galleries/:path/
+
+defaults:
+  - scope: { type: galleries }
+    values: { layout: gallery, main_class: wide }
+  - scope: { type: photos }
+    values: { layout: photo, main_class: wide, script: /assets/js/photo-nav.js }
 
 plugins:
   - jekyll-feed                                # generates /feed.xml
@@ -38,9 +47,8 @@ plugins:
 sass:
   sass_dir:     _sass
   style:        compressed
-  quiet_deps:   true                           # hush warnings from the vendored theme
   silence_deprecations:
-    - import
+    - import                                   # scssify compiles `@import 'main'` in head.html
 
 exclude:
   - Gemfile

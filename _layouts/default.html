@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
   {% include head.html %}
-
   <body>
-
-    {% include navigation.html %}
-
-    <main>
-      {{ content }}
-    </main>
-
-    {% include footer.html %}
+    <div class="page {{ page.main_class | default: 'text' }}">
+      {% include nav.html %}
+      <main>
+        {{ content }}
+      </main>
+    </div>
+    {%- if page.script %}
+    <script defer src="{{ page.script | relative_url }}"></script>
+    {%- endif %}
   </body>
 </html>
