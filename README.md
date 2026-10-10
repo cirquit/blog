@@ -45,7 +45,6 @@ mise exec -- bundle exec jekyll serve --drafts --livereload
 | `assets/fonts/` | Source Serif 4 (woff2) and its OFL license |
 | `assets/js/photo-nav.js` | Arrow keys / swipe on photo pages; the site's only script |
 | `scripts/import-gallery.rb` | One-time helper to stub out a gallery from a folder of images |
-| `scripts/make-photo.sh`, `scripts/merge-photo-metadata.rb` | Old photo pipeline, currently unused |
 
 Ignored (regenerated, never committed): `_site/`, `vendor/`, `.jekyll-cache/`.
 
@@ -71,10 +70,9 @@ Nav links are in `_includes/nav.html`; colors, fonts and widths in
    layout: post
    title: "My Post Title"
    date: 2026-09-20 10:00:00 +0000
-   tags: [ideas, notes]
    ---
    ```
-   A `date` in the future stays hidden until then. `tags` is optional.
+   A `date` in the future stays hidden until then.
 3. Write the body in Markdown.
 4. Commit. With `jekyll serve` running, refresh to preview.
 

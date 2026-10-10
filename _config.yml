@@ -4,7 +4,7 @@
 title:          My Blog                       # TODO: your blog's name (shown in the header + browser tab)
 description:    "A personal blog."             # TODO: one line, used in SEO tags + the RSS feed
 author:
-  name:         Your Name                      # TODO: shown under every post as "Written by ..."
+  name:         Your Name                      # TODO: used in the RSS feed + SEO metadata
   email:        ""                             #       optional; leave "" to omit
   url:          ""                             #       optional; your homepage, leave "" to omit
 
