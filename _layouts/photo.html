@@ -21,11 +21,25 @@ layout: default
 {%- if camera != "" %}{% assign parts = parts | push: camera %}{% endif -%}
 {%- if lens != "" %}{% assign parts = parts | push: lens %}{% endif -%}
 {%- if exposure != "" %}{% assign parts = parts | push: exposure %}{% endif -%}
-<figure class="photo">
+{%- assign states = "folded,open" | split: "," -%}
+{%- comment -%}
+Caption state lives in the URL fragment (#open = caption shown, anything else = hidden;
+see _sass/main.scss). Everything that depends on it is rendered once per state inside a
+.s-<state> wrapper; the open copies link to <page>/#open so the state follows you.
+CSS shows one copy.
+{%- endcomment -%}
+<i id="open"></i>
+{%- for s in states %}{% if s == "open" %}{% assign hash = "#open" %}{% else %}{% assign hash = "" %}{% endif %}
+<div class="s s-{{ s }}">
+  {%- if prev %}<a class="zone prev" href="{{ prev.url | relative_url }}{{ hash }}" rel="prev" aria-label="Previous photo"></a>{% endif %}
+  {%- if next %}<a class="zone next" href="{{ next.url | relative_url }}{{ hash }}" rel="next" aria-label="Next photo"></a>{% endif %}
+</div>
+{%- endfor %}
+<figure class="photo" style="--ratio: {{ page.ratio | default: 1.5 }}">
   <div class="stage">
     <img src="{{ page.image | relative_url }}" alt="{{ page.alt }}">
-    {%- if prev %}<a class="zone prev" href="{{ prev.url | relative_url }}" rel="prev" aria-label="Previous photo"></a>{% endif %}
-    {%- if next %}<a class="zone next" href="{{ next.url | relative_url }}" rel="next" aria-label="Next photo"></a>{% endif %}
+    <div class="s s-folded"><a class="toggle" href="#open" aria-label="Show caption"></a></div>
+    <div class="s s-open"><a class="toggle" href="{{ page.url | relative_url }}" aria-label="Hide caption"></a></div>
   </div>
   <figcaption>
     {%- if note != "" %}<p class="note">{{ note }}</p>{% endif %}
@@ -34,9 +48,13 @@ layout: default
     {%- if body != "" %}<div class="comment">{{ body }}</div>{% endif %}
   </figcaption>
 </figure>
-<nav class="photo-nav text">
-  {%- if prev %}<a href="{{ prev.url | relative_url }}" rel="prev">← prev</a>{% else %}<span></span>{% endif %}
-  <span>{{ idx | plus: 1 }} / {{ photos.size }}</span>
-  {%- if next %}<a href="{{ next.url | relative_url }}" rel="next">next →</a>{% else %}<span></span>{% endif %}
-</nav>
-<p class="back text meta"><a href="{{ gal.url | default: '/series/' | relative_url }}">{{ gal.title | default: 'All series' }}</a></p>
+{%- for s in states %}{% if s == "open" %}{% assign hash = "#open" %}{% else %}{% assign hash = "" %}{% endif %}
+<div class="s s-{{ s }}">
+  <nav class="photo-nav">
+    {%- if prev %}<a href="{{ prev.url | relative_url }}{{ hash }}" rel="prev" class="prev">← prev</a>{% else %}<span class="prev"></span>{% endif %}
+    <span>{{ idx | plus: 1 }} / {{ photos.size }}</span>
+    {%- if next %}<a href="{{ next.url | relative_url }}{{ hash }}" rel="next" class="next">next →</a>{% else %}<span class="next"></span>{% endif %}
+  </nav>
+</div>
+{%- endfor %}
+<a class="close" href="{{ gal.url | default: '/series/' | relative_url }}" aria-label="Back to series">×</a>

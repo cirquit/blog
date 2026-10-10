@@ -2,7 +2,6 @@ $paper: var(--paper);
 $ink: var(--ink);
 $grey: var(--grey);
 $text-width: 38rem;
-$wide-width: 72rem;
 
 * { box-sizing: border-box; }
 
@@ -38,8 +37,6 @@ h3 { font-size: 1.1rem; margin: 1.8rem 0 .4rem; }
 
 .page { margin: 0 auto; }
 .page.text { max-width: $text-width; }
-.page.wide { max-width: $wide-width; }
-.wide .text { max-width: $text-width; }
 
 .site-nav {
   display: flex; gap: 1.5rem; align-items: baseline;
@@ -88,28 +85,100 @@ article > header { margin-bottom: 2rem; }
   a .meta { display: block; }
 }
 
-// Photo page
-.photo { margin: 0; }
+// Sizing model: a picture is a box of height × --ratio (width / height, set
+// inline from the photo's front matter). A page only decides the height: a row
+// height for thumbnails, the space left over for the reader.
+
+// Series page: justified rows. A thumb's basis and growth are proportional to
+// its ratio, so every row fills the column at one height.
+.thumbs {
+  --row-h: 9rem;
+  display: flex; flex-wrap: wrap; gap: .5rem;
+  &::after { content: ""; flex-grow: 10000; }  // keeps the last row at natural size
+  a { display: block; flex: calc(var(--ratio) * 100) 1 calc(var(--ratio) * var(--row-h)); }
+  img { display: block; width: 100%; height: auto; }
+}
+
+// Reader (photo page): a fixed full-screen page that never scrolls. Rows: photo +
+// caption (centred, the photo gets the row's height minus the caption), then nav.
+// Layers by DOM order, no z-index: click zones (the left / right half of the
+// screen) under the photo block and nav. The upper layer is click-through except
+// the photo toggle, caption text and nav links, so empty space still pages.
+.page.reader {
+  font-size: clamp(18px, 14.5px + .94vmin, 22px);  // 18px at 375 wide, 22px from ~800
+  position: fixed; inset: 0; max-width: none;
+  padding: max(1em, env(safe-area-inset-top)) max(1em, env(safe-area-inset-right)) max(.5em, env(safe-area-inset-bottom)) max(1em, env(safe-area-inset-left));
+  display: flex; flex-direction: column;
+  .site-nav { display: none; }
+  main { flex: 1; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+}
+
+.zone { position: fixed; top: 0; bottom: 0; width: 50%; }
+.zone.prev { left: 0; cursor: w-resize; }
+.zone.next { right: 0; cursor: e-resize; }
+
+.photo {
+  --caption-h: 5em;  // caption box incl. its top gap
+  --cap: 0;          // 0 caption hidden (default), 1 shown (#open)
+  --gutter: 1em;     // keeps a click zone beside a width-limited photo
+  --w: min(calc(100cqw - 2 * var(--gutter)), calc((100cqh - var(--caption-h) * var(--cap)) * var(--ratio)));
+  position: relative; pointer-events: none; margin: 0;
+  container-type: size;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+.stage, .photo figcaption { width: var(--w); }
 .stage {
-  position: relative; width: fit-content; max-width: 100%; margin: 0 auto;
-  img { max-height: 85vh; width: auto; max-width: 100%; object-fit: contain; }
-  .zone { position: absolute; top: 0; bottom: 0; width: 50%; }
-  .prev { left: 0; cursor: w-resize; }
-  .next { right: 0; cursor: e-resize; }
+  position: relative;
+  img { display: block; width: 100%; height: auto; aspect-ratio: var(--ratio); object-fit: contain; }
 }
-figcaption {
-  max-width: $text-width; margin: 1rem auto 0;
-  .note { margin: 0 0 .25rem; font-size: .9rem; }
-  .meta { font-size: .75rem; }
-  .comment { margin-top: 1rem; p { margin: 0 0 1rem; } }
+.toggle { position: absolute; inset: 0; cursor: pointer; pointer-events: auto; }
+
+// Fixed height, so the photo never resizes with the caption; long text scrolls.
+.photo figcaption {
+  box-sizing: border-box; height: calc(var(--caption-h) * var(--cap)); overflow-y: auto;
+  padding-top: calc(.5em * var(--cap)); text-align: center;
+  > * { pointer-events: auto; width: fit-content; margin: 0 auto; }
+  .note { font-size: .8em; }
+  .meta { font-size: .7em; }
+  .comment { margin-top: .5em; font-size: .8em; p { margin: 0 0 .5em; } }
 }
+
 .photo-nav {
-  display: flex; justify-content: space-between; margin-top: 1.5rem;
-  > * { flex: 1; text-align: center; }
-  > :first-child { text-align: left; }
-  > :last-child { text-align: right; }
+  position: relative; pointer-events: none;
+  display: flex; justify-content: center; gap: 3em; margin: .25em 0 .75em; font-size: .75em;
+  a { pointer-events: auto; }
+  .prev, .next { min-width: 4em; }
+  .prev { text-align: right; }
 }
-.back { margin-top: 1rem; text-align: center; }
+
+// Back to the series: fixed size on every screen (iPhone SE: 44px target, 24px glyph).
+.close {
+  position: fixed; top: max(8px, env(safe-area-inset-top)); right: max(8px, env(safe-area-inset-right));
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; line-height: 1; text-decoration: none;
+  color: rgba(255, 255, 255, .75); text-shadow: 0 0 3px rgba(0, 0, 0, .6);
+}
+
+// Short screens (phone rotated): a smaller caption box.
+@media (max-height: 30rem) {
+  .page.reader { padding-top: max(.5em, env(safe-area-inset-top)); }
+  .photo { --caption-h: 2.65em; }
+  .photo figcaption { padding-top: calc(.25em * var(--cap)); }
+  .photo-nav { margin: .25em 0; }
+}
+
+// Caption state lives in the URL: "<photo>/#open" shows it, anything else hides it.
+// Links that depend on the state are rendered twice, wrapped in .s-folded / .s-open;
+// exactly one wrapper shows.
+#open { position: fixed; width: 0; height: 0; }
+.s { display: contents; }
+.s-open { display: none; }
+:root:has(#open:target) {
+  .s-folded { display: none; }
+  .s-open { display: contents; }
+  .photo { --cap: 1; }
+}
 
 .about { font-size: 1.6rem; line-height: 1.4; }
 

@@ -1,10 +1,14 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# One-time convenience: copy images into a series and stub out one Markdown
-# file per photo. Never overwrites anything. See README "Series".
+# Turn a folder of original photos into a series: web-sized + thumbnail WebP in
+# assets/photos/<slug>/, one editable stub per photo in _photos/<slug>/, and
+# _series/<slug>.md if missing. Originals are only read. Never overwrites;
+# running again on more photos continues the numbering.
 #
-#   mise exec -- bundle exec ruby scripts/import-series.rb <slug> <image-dir> [--title "Title"]
+#   mise exec -- bundle exec ruby scripts/import-series.rb <slug> <dir> [--title "Title"]
+#
+# Needs ImageMagick (`magick`); uses `exiftool` for the caption line if installed.
 
 require "date"
 require "fileutils"
@@ -12,75 +16,74 @@ require "json"
 require "open3"
 
 ROOT = File.expand_path("..", __dir__)
-EXTS = %w[.jpg .jpeg .png .webp .avif].freeze
+EXTS = %w[.jpg .jpeg .png .tif .tiff .webp].freeze
+FULL = ["-resize", "2400x2400>", "-quality", "82"].freeze
+THUMB = ["-resize", "640x640>", "-quality", "75"].freeze
 
-args = ARGV.dup
-title = nil
-if (i = args.index("--title"))
-  title = args[i + 1]
-  args.slice!(i, 2)
-end
-slug, dir = args
-abort "usage: import-series.rb <slug> <image-dir> [--title \"Title\"]" unless slug && dir && File.directory?(dir)
+def which?(cmd) = system("which #{cmd} > /dev/null 2>&1")
 
 def q(value) = value.to_s.strip.empty? ? '""' : JSON.generate(value.to_s)
 
 def exif(path)
-  return {} unless system("which exiftool > /dev/null 2>&1")
+  return {} unless which?("exiftool")
 
   out, status = Open3.capture2("exiftool", "-json", "-n", path)
-  return {} unless status.success?
-
-  JSON.parse(out).first || {}
-rescue JSON::ParserError
-  {}
+  status.success? ? (JSON.parse(out).first || {}) : {}
 end
+
+def convert(src, dst, opts)
+  system("magick", src, "-auto-orient", "-strip", *opts, dst) || abort("magick failed on #{src}")
+end
+
+args = ARGV.dup
+title = (i = args.index("--title")) && args.slice!(i, 2).last
+slug, dir = args
+abort "usage: import-series.rb <slug> <dir> [--title \"Title\"]" unless slug && dir && File.directory?(dir)
+abort "ImageMagick (magick) is required" unless which?("magick")
 
 images = Dir.children(dir).select { |f| EXTS.include?(File.extname(f).downcase) }.sort
 abort "no images found in #{dir}" if images.empty?
 
-photo_dir = File.join(ROOT, "_photos", slug)
-asset_dir = File.join(ROOT, "assets", "photos", slug)
-FileUtils.mkdir_p([photo_dir, asset_dir])
-
-n = Dir.children(photo_dir).filter_map { |f| f[/\A(\d+)\.md\z/, 1]&.to_i }.max || 0
+photos = File.join(ROOT, "_photos", slug)
+assets = File.join(ROOT, "assets", "photos", slug)
+FileUtils.mkdir_p([photos, assets])
+n = Dir.children(photos).filter_map { |f| f[/\A(\d+)\.md\z/, 1]&.to_i }.max || 0
 
 images.each do |file|
-  n += 1
-  nn = format("%02d", n)
-  ext = File.extname(file).downcase
-  image = File.join(asset_dir, "#{nn}#{ext}")
-  md = File.join(photo_dir, "#{nn}.md")
-  if File.exist?(image) || File.exist?(md)
-    puts "skip   #{nn} (exists)"
-    next
-  end
+  nn = format("%02d", n += 1)
+  full = File.join(assets, "#{nn}-full.webp")
+  thumb = File.join(assets, "#{nn}-thumb.webp")
+  md = File.join(photos, "#{nn}.md")
+  next puts("skip   #{nn} (exists)") if [full, thumb, md].any? { |p| File.exist?(p) }
 
-  FileUtils.cp(File.join(dir, file), image)
-  e = exif(image)
-  f = ->(k) { e[k] }
-  aperture = f.("FNumber") && "f/#{f.("FNumber")}"
-  shutter = f.("ExposureTime") && (f.("ExposureTime") < 1 ? "1/#{(1 / f.("ExposureTime")).round}" : f.("ExposureTime").to_s)
-  focal = f.("FocalLength") && "#{f.("FocalLength").to_s.sub(/\.0\z/, "")} mm"
+  src = File.join(dir, file)
+  convert(src, full, FULL)
+  convert(src, thumb, THUMB)
+  w, h = `magick identify -format "%w %h" #{full}`.split.map(&:to_f)
+  e = exif(src)
+  shutter = e["ExposureTime"] && (e["ExposureTime"] < 1 ? "1/#{(1 / e["ExposureTime"]).round}" : e["ExposureTime"].to_s)
+  focal = e["FocalLength"] && "#{e["FocalLength"].to_s.sub(/\.0\z/, "")} mm"
+  taken = (e["DateTimeOriginal"] || e["CreateDate"])&.sub(/\A(\d+):(\d+):(\d+)/, '\1-\2-\3')
 
   File.write(md, <<~MD)
     ---
     series: #{slug}
-    image: /assets/photos/#{slug}/#{nn}#{ext}
+    image: /assets/photos/#{slug}/#{nn}-full.webp
+    thumb: /assets/photos/#{slug}/#{nn}-thumb.webp
+    ratio: #{(w / h).round(3)}
     alt: ""
     note: ""
     place: ""
-    camera: #{q(f.("Model"))}
-    lens: #{q(f.("LensModel") || f.("LensID"))}
+    camera: #{q(e["Model"])}
+    lens: #{q(e["LensModel"] || e["LensID"])}
     focal_length: #{q(focal)}
-    aperture: #{q(aperture)}
+    aperture: #{q(e["FNumber"] && "f/#{e["FNumber"]}")}
     shutter: #{q(shutter)}
-    iso: #{q(f.("ISO"))}
-    captured_at: #{q((f.("DateTimeOriginal") || f.("CreateDate"))&.sub(/\A(\d+):(\d+):(\d+)/, '\\1-\\2-\\3'))}
+    iso: #{q(e["ISO"])}
+    captured_at: #{q(taken)}
     ---
   MD
-  puts "wrote  assets/photos/#{slug}/#{nn}#{ext}"
-  puts "wrote  _photos/#{slug}/#{nn}.md"
+  puts "wrote  _photos/#{slug}/#{nn}.md  (+ #{nn}-full.webp, #{nn}-thumb.webp)"
 end
 
 series = File.join(ROOT, "_series", "#{slug}.md")

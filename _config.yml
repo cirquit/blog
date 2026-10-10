@@ -1,54 +1,42 @@
-# ─────────────────────────────────────────────────────────────
-#  SITE IDENTITY  —  edit these 4, then rebuild
-# ─────────────────────────────────────────────────────────────
 title:          "blog"
-description:    "Personal writing and amateur photography."
+description:    "personal writing and photography"
 author:
-  name:         alex # TODO: used in the RSS feed + SEO metadata
-  email:        ""                             #       optional; leave "" to omit
-  url:          ""                             #       optional; your homepage, leave "" to omit
+  name:         alex
+  email:        ""
+  url:          ""
 
-# ─────────────────────────────────────────────────────────────
-#  WHERE THE SITE LIVES  —  edit when you publish / add a domain
-# ─────────────────────────────────────────────────────────────
-url:            "https://cirquit.github.io"    # scheme + host, no trailing slash
-baseurl:        "/blog"                        # subpath: cirquit.github.io/blog. Set to "" for a user site or custom domain
+url:            "https://cirquit.github.io"
+baseurl:        "/blog"
 
-# ─────────────────────────────────────────────────────────────
-#  BUILD  —  you will rarely touch anything below
-# ─────────────────────────────────────────────────────────────
 markdown:       kramdown
-permalink:      /writing/:title                # post URL shape, e.g. /writing/hello
-paginate:       5                              # posts per page on /writing/
-paginate_path:  /writing/page:num/            # pages 2+ of the post list
-
-include:
-  - _pages
+permalink:      /writing/:title
+paginate:       5
+paginate_path:  /writing/page:num/
 
 collections:
   series:
-    output: true                               # _series/<slug>.md  ->  /series/<slug>/
+    output: true                               # _series/<slug>.md -> /series/<slug>/
     permalink: /series/:path/
   photos:
-    output: true                               # _photos/<slug>/<NN>.md  ->  /series/<slug>/<NN>/
+    output: true                               # _photos/<slug>/<NN>.md -> /series/<slug>/<NN>/
     permalink: /series/:path/
 
 defaults:
   - scope: { type: series }
     values: { layout: series }
   - scope: { type: photos }
-    values: { layout: photo, dark: true, main_class: wide, script: /assets/js/photo-nav.js }
+    values: { layout: photo, dark: true, main_class: reader, script: /assets/js/photo-nav.js }
 
 plugins:
-  - jekyll-feed                                # generates /feed.xml
-  - jekyll-paginate                            # home-page pagination
-  - jekyll-seo-tag                             # <title>, OpenGraph, JSON-LD
+  - jekyll-feed
+  - jekyll-paginate
+  - jekyll-seo-tag
 
 sass:
   sass_dir:     _sass
   style:        compressed
   silence_deprecations:
-    - import                                   # scssify compiles `@import 'main'` in head.html
+    - import                                   # head.html compiles `@import 'main'`
 
 exclude:
   - Gemfile
