@@ -1,6 +1,6 @@
-$paper: #fbfaf7;
-$ink: #1a1a1a;
-$grey: #6b6b6b;
+$paper: var(--paper);
+$ink: var(--ink);
+$grey: var(--grey);
 $text-width: 38rem;
 $wide-width: 72rem;
 
@@ -10,17 +10,20 @@ html {
   font-family: 'Source Serif 4', Georgia, serif;
   font-size: 18px;
   line-height: 1.6;
-  background: $paper;
-  color: $ink;
   -webkit-text-size-adjust: 100%;
 }
 
-body { margin: 0; padding: 0 1.25rem 4rem; }
+body {
+  --paper: #fbfaf7; --ink: #1a1a1a; --grey: #6b6b6b;
+  margin: 0; padding: 0 1.25rem 4rem; min-height: 100vh;
+  background: $paper; color: $ink;
+}
+body.dark { --paper: #111; --ink: #e8e6e1; --grey: #8a8a8a; }
 
 a {
   color: inherit;
   text-decoration: underline;
-  text-decoration-color: rgba(26, 26, 26, .35);
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
   text-underline-offset: .15em;
   &:hover { text-decoration-color: currentColor; }
 }
@@ -30,7 +33,7 @@ h1 { font-size: 1.9rem; margin: 0 0 .25rem; }
 h2 { font-size: 1.35rem; margin: 2.2rem 0 .5rem; }
 h3 { font-size: 1.1rem; margin: 1.8rem 0 .4rem; }
 
-.meta, .site-nav, .photo-nav, figcaption .meta { color: $grey; font-size: .85rem; }
+.meta, .site-nav, .photo-nav { color: $grey; font-size: .85rem; }
 .meta { margin: 0; }
 
 .page { margin: 0 auto; }
@@ -68,8 +71,8 @@ article > header { margin-bottom: 2rem; }
   .tweet-cite-name { font-weight: 600; }
 }
 
-// Galleries
-.gallery-head { margin: 0 0 2.5rem; .lede { margin: 1rem 0 0; } }
+// Series
+.series-head { margin: 0 0 2.5rem; .lede { margin: 1rem 0 0; } }
 .grid {
   display: grid; gap: .75rem;
   grid-template-columns: repeat(2, 1fr);
@@ -77,8 +80,8 @@ article > header { margin-bottom: 2rem; }
   @media (min-width: 60rem) { grid-template-columns: repeat(4, 1fr); }
   img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
 }
-.grid.galleries {
-  gap: 2rem 1.25rem; margin-top: 2rem;
+.grid.series {
+  gap: 2rem 1.25rem;
   a { text-decoration: none; }
   .g-title { display: block; margin-top: .5rem; font-weight: 600; }
   .g-title + .meta { margin-top: 0; }
@@ -96,7 +99,8 @@ article > header { margin-bottom: 2rem; }
 }
 figcaption {
   max-width: $text-width; margin: 1rem auto 0;
-  .note { margin: 0 0 .25rem; }
+  .note { margin: 0 0 .25rem; font-size: .9rem; }
+  .meta { font-size: .75rem; }
   .comment { margin-top: 1rem; p { margin: 0 0 1rem; } }
 }
 .photo-nav {
@@ -106,5 +110,7 @@ figcaption {
   > :last-child { text-align: right; }
 }
 .back { margin-top: 1rem; text-align: center; }
+
+.about { font-size: 1.6rem; line-height: 1.4; }
 
 .photo-inline { margin: 2rem 0; figcaption { margin: .5rem 0 0; color: $grey; font-size: .85rem; } }

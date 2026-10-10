@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# One-time convenience: copy images into a gallery and stub out one Markdown
-# file per photo. Never overwrites anything. See README "Galleries".
+# One-time convenience: copy images into a series and stub out one Markdown
+# file per photo. Never overwrites anything. See README "Series".
 #
-#   mise exec -- bundle exec ruby scripts/import-gallery.rb <slug> <image-dir> [--title "Title"]
+#   mise exec -- bundle exec ruby scripts/import-series.rb <slug> <image-dir> [--title "Title"]
 
 require "date"
 require "fileutils"
@@ -21,7 +21,7 @@ if (i = args.index("--title"))
   args.slice!(i, 2)
 end
 slug, dir = args
-abort "usage: import-gallery.rb <slug> <image-dir> [--title \"Title\"]" unless slug && dir && File.directory?(dir)
+abort "usage: import-series.rb <slug> <image-dir> [--title \"Title\"]" unless slug && dir && File.directory?(dir)
 
 def q(value) = value.to_s.strip.empty? ? '""' : JSON.generate(value.to_s)
 
@@ -65,7 +65,7 @@ images.each do |file|
 
   File.write(md, <<~MD)
     ---
-    gallery: #{slug}
+    series: #{slug}
     image: /assets/photos/#{slug}/#{nn}#{ext}
     alt: ""
     note: ""
@@ -83,12 +83,12 @@ images.each do |file|
   puts "wrote  _photos/#{slug}/#{nn}.md"
 end
 
-gallery = File.join(ROOT, "_galleries", "#{slug}.md")
-if File.exist?(gallery)
-  puts "skip   _galleries/#{slug}.md (exists)"
+series = File.join(ROOT, "_series", "#{slug}.md")
+if File.exist?(series)
+  puts "skip   _series/#{slug}.md (exists)"
 else
-  FileUtils.mkdir_p(File.dirname(gallery))
-  File.write(gallery, <<~MD)
+  FileUtils.mkdir_p(File.dirname(series))
+  File.write(series, <<~MD)
     ---
     title: #{q(title || slug.tr("-_", "  ").capitalize)}
     date: #{Date.today}
@@ -96,5 +96,5 @@ else
     cover: "01"
     ---
   MD
-  puts "wrote  _galleries/#{slug}.md"
+  puts "wrote  _series/#{slug}.md"
 end

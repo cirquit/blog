@@ -1,8 +1,8 @@
-# blog
+# Personal site
 
-Personal blog. Jekyll, a small hand-written theme (one SCSS file, a few
+Personal site. Jekyll, a small hand-written theme (one SCSS file, a few
 layouts), Source Serif 4 self-hosted, CSS inlined. Two things only:
-**Writing** (posts) and **Galleries** (one Markdown file per photo). Hosted on
+**Writing** (posts) and **Series** (one Markdown file per photo). Hosted on
 GitHub Pages, built by GitHub Actions.
 
 ---
@@ -34,17 +34,17 @@ mise exec -- bundle exec jekyll serve --drafts --livereload
 | `_config.yml` | Site name, your name, URL, collections, build settings |
 | `_posts/` | One Markdown file per post |
 | `_drafts/` | Unpublished drafts; `template.md` is the starting point |
-| `_galleries/<slug>.md` | One per gallery (title, date, description, cover, optional intro) |
-| `_photos/<slug>/<NN>.md` | One per photo; the filename order is the gallery order |
+| `_series/<slug>.md` | One per series (title, date, description, cover, optional intro) |
+| `_photos/<slug>/<NN>.md` | One per photo; the filename order is the series order |
 | `assets/photos/<slug>/` | The image files |
-| `_pages/galleries.html`, `_pages/404.html` | Gallery index, "not found" page |
-| `index.html` | The post list (`/blog/`, 5 per page) |
-| `_layouts/` | `default`, `post`, `gallery`, `photo` |
+| `_pages/series.html`, `_pages/404.html` | Series index, "not found" page |
+| `index.html`, `writing/index.html` | Landing page; the post list (`/writing/`, 5 per page) |
+| `_layouts/` | `default`, `post`, `series`, `photo` |
 | `_includes/` | `head`, `nav`, plus `tweet.html` and `photo.html` for use inside posts |
 | `_sass/main.scss` | The whole stylesheet (colors and widths are variables at the top) |
 | `assets/fonts/` | Source Serif 4 (woff2) and its OFL license |
 | `assets/js/photo-nav.js` | Arrow keys / swipe on photo pages; the site's only script |
-| `scripts/import-gallery.rb` | One-time helper to stub out a gallery from a folder of images |
+| `scripts/import-series.rb` | One-time helper to stub out a series from a folder of images |
 
 Ignored (regenerated, never committed): `_site/`, `vendor/`, `.jekyll-cache/`.
 
@@ -113,22 +113,22 @@ JavaScript, nothing loads from X, and it survives the tweet being deleted.
 
 ---
 
-## 5. Galleries
+## 5. Series
 
-A gallery is `_galleries/<slug>.md` plus one file per photo. Everything is
+A series is `_series/<slug>.md` plus one file per photo. Everything is
 plain text; edit by hand whenever.
 
 ```yaml
-# _galleries/demo.md  (the body, if any, is shown under the description)
-title: Demo gallery
+# _series/demo.md  (the body, if any, is shown under the description)
+title: Demo series
 date: 2026-09-20
 description: One or two sentences shown under the title.
-cover: "01"            # which photo's thumb represents it on /galleries/
+cover: "01"            # which photo's thumb represents it on /series/
 ```
 
 ```yaml
-# _photos/demo/01.md  (all fields optional except gallery + image)
-gallery: demo
+# _photos/demo/01.md  (all fields optional except series + image)
+series: demo
 image: /assets/photos/demo/beach-01-full.webp
 thumb: /assets/photos/demo/beach-01-thumb.webp   # falls back to image
 alt: Flower in golden light
@@ -145,17 +145,17 @@ captured_at: 2026-09-20 02:09:04
 
 The Markdown body of a photo file, if any, is rendered as a comment under the
 caption. Empty or missing fields are skipped. Photos appear in filename order
-(`01`, `02`, ...); each is at `/galleries/<slug>/<NN>/`.
+(`01`, `02`, ...); each is at `/series/<slug>/<NN>/`.
 
 ### Import helper
 
 ```sh
-mise exec -- bundle exec ruby scripts/import-gallery.rb <slug> <image-dir> [--title "Title"]
+mise exec -- bundle exec ruby scripts/import-series.rb <slug> <image-dir> [--title "Title"]
 ```
 
 Copies the images to `assets/photos/<slug>/NN.<ext>` (no resizing), writes
 `_photos/<slug>/NN.md` stubs (EXIF filled in if `exiftool` is installed) and
-`_galleries/<slug>.md` if missing. Numbering continues after the highest
+`_series/<slug>.md` if missing. Numbering continues after the highest
 existing `NN`; it never overwrites anything.
 
 ---
@@ -174,12 +174,12 @@ When ready to go live:
 ### Custom domain (later)
 
 1. Add a file named `CNAME` at the repo root containing just the domain
-   (e.g. `blog.example.com`).
+   (e.g. `www.example.com`).
 2. At your DNS provider: a `CNAME` record for the subdomain → `cirquit.github.io`
    (for an apex domain, four `A` records to GitHub's Pages IPs — current list in
    [GitHub's docs](https://docs.github.com/pages/configuring-a-custom-domain-for-your-github-pages-site)).
 3. Settings → Pages → enter the domain, wait for DNS, tick **Enforce HTTPS**.
-4. In `_config.yml`: set `baseurl: ""` and `url: "https://blog.example.com"`.
+4. In `_config.yml`: set `baseurl: ""` and `url: "https://www.example.com"`.
 
 ---
 

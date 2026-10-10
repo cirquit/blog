@@ -2,7 +2,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  {% seo %}
+  {%- if page.collection == "photos" %}
+    {%- assign parent_series = site.series | where: "slug", page.series | first %}
+    {%- assign parent = parent_series.title | downcase | append: " | " %}
+  {%- elsif page.collection == "posts" %}
+    {%- assign parent = "writing | " %}
+  {%- endif %}
+  <title>{% if page.url == "/" %}{{ site.title }}{% else %}{{ page.title | downcase }} | {{ parent }}{{ site.title }}{% endif %}</title>
+  {% seo title=false %}
 
   <link rel="preload" as="font" type="font/woff2" crossorigin
         href="{{ "/assets/fonts/source-serif-4-400.woff2" | relative_url }}">

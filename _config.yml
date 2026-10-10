@@ -1,10 +1,10 @@
 # ─────────────────────────────────────────────────────────────
 #  SITE IDENTITY  —  edit these 4, then rebuild
 # ─────────────────────────────────────────────────────────────
-title:          My Blog                       # TODO: your blog's name (shown in the header + browser tab)
-description:    "A personal blog."             # TODO: one line, used in SEO tags + the RSS feed
+title:          "blog"
+description:    "Personal writing and amateur photography."
 author:
-  name:         Your Name                      # TODO: used in the RSS feed + SEO metadata
+  name:         alex # TODO: used in the RSS feed + SEO metadata
   email:        ""                             #       optional; leave "" to omit
   url:          ""                             #       optional; your homepage, leave "" to omit
 
@@ -12,32 +12,32 @@ author:
 #  WHERE THE SITE LIVES  —  edit when you publish / add a domain
 # ─────────────────────────────────────────────────────────────
 url:            "https://cirquit.github.io"    # scheme + host, no trailing slash
-baseurl:        "/blog"                        # subpath. "/blog" for cirquit.github.io/blog
-                                               # set to "" once a custom domain points at the site
+baseurl:        "/blog"                        # subpath: cirquit.github.io/blog. Set to "" for a user site or custom domain
 
 # ─────────────────────────────────────────────────────────────
 #  BUILD  —  you will rarely touch anything below
 # ─────────────────────────────────────────────────────────────
 markdown:       kramdown
-permalink:      /:year-:month-:day/:title      # post URL shape, e.g. /2026-09-06/hello
-paginate:       5                              # posts per page on /blog/ (the home page)
+permalink:      /writing/:title                # post URL shape, e.g. /writing/hello
+paginate:       5                              # posts per page on /writing/
+paginate_path:  /writing/page:num/            # pages 2+ of the post list
 
 include:
   - _pages
 
 collections:
-  galleries:
-    output: true                               # _galleries/<slug>.md  ->  /galleries/<slug>/
-    permalink: /galleries/:path/
+  series:
+    output: true                               # _series/<slug>.md  ->  /series/<slug>/
+    permalink: /series/:path/
   photos:
-    output: true                               # _photos/<slug>/<NN>.md  ->  /galleries/<slug>/<NN>/
-    permalink: /galleries/:path/
+    output: true                               # _photos/<slug>/<NN>.md  ->  /series/<slug>/<NN>/
+    permalink: /series/:path/
 
 defaults:
-  - scope: { type: galleries }
-    values: { layout: gallery, main_class: wide }
+  - scope: { type: series }
+    values: { layout: series }
   - scope: { type: photos }
-    values: { layout: photo, main_class: wide, script: /assets/js/photo-nav.js }
+    values: { layout: photo, dark: true, main_class: wide, script: /assets/js/photo-nav.js }
 
 plugins:
   - jekyll-feed                                # generates /feed.xml

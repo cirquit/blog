@@ -1,13 +1,13 @@
 ---
 layout: default
 ---
-{%- assign photos = site.photos | where: "gallery", page.gallery | sort: "path" -%}
+{%- assign photos = site.photos | where: "series", page.series | sort: "path" -%}
 {%- for p in photos %}{% if p.url == page.url %}{% assign idx = forloop.index0 %}{% endif %}{% endfor -%}
 {%- assign prev_idx = idx | minus: 1 -%}
 {%- assign next_idx = idx | plus: 1 -%}
 {%- if idx > 0 %}{% assign prev = photos[prev_idx] %}{% endif -%}
 {%- assign next = photos[next_idx] -%}
-{%- assign gal = site.galleries | where: "slug", page.gallery | first -%}
+{%- assign gal = site.series | where: "slug", page.series | first -%}
 {%- assign note = page.note | strip -%}
 {%- assign iso = page.iso | append: "" | strip -%}
 {%- assign place = page.place | strip -%}
@@ -39,4 +39,4 @@ layout: default
   <span>{{ idx | plus: 1 }} / {{ photos.size }}</span>
   {%- if next %}<a href="{{ next.url | relative_url }}" rel="next">next →</a>{% else %}<span></span>{% endif %}
 </nav>
-<p class="back text meta"><a href="{{ gal.url | default: '/galleries/' | relative_url }}">{{ gal.title | default: 'All galleries' }}</a></p>
+<p class="back text meta"><a href="{{ gal.url | default: '/series/' | relative_url }}">{{ gal.title | default: 'All series' }}</a></p>

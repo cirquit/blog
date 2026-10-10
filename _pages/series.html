@@ -1,14 +1,12 @@
 ---
 layout: default
-title: Galleries
-permalink: /galleries/
-main_class: wide
+title: Series
+permalink: /series/
 ---
-<h1 class="text">Galleries</h1>
-<div class="grid galleries">
-  {%- assign galleries = site.galleries | sort: "date" | reverse %}
-  {%- for g in galleries %}
-  {%- assign photos = site.photos | where: "gallery", g.slug | sort: "path" %}
+<div class="grid series">
+  {%- assign series = site.series | sort: "date" | reverse %}
+  {%- for g in series %}
+  {%- assign photos = site.photos | where: "series", g.slug | sort: "path" %}
   {%- assign cover_path = "_photos/" | append: g.slug | append: "/" | append: g.cover | append: ".md" %}
   {%- assign cover = photos | where: "path", cover_path | first | default: photos.first %}
   <a href="{{ g.url | relative_url }}">

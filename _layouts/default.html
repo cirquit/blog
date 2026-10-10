@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   {% include head.html %}
-  <body>
+  <body{% if page.dark %} class="dark"{% endif %}>
     <div class="page {{ page.main_class | default: 'text' }}">
       {% include nav.html %}
       <main>
