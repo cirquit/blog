@@ -9,18 +9,17 @@ layout: default
 {%- assign next = photos[next_idx] -%}
 {%- assign gal = site.series | where: "slug", page.series | first -%}
 {%- assign note = page.note | strip -%}
+{%- comment -%} caption: camera - lens focal range - aperture - shutter - ISO - Month in Place; empty fields are skipped {%- endcomment -%}
 {%- assign iso = page.iso | append: "" | strip -%}
-{%- assign place = page.place | strip -%}
-{%- assign camera = page.camera | strip -%}
-{%- assign lens = page.lens | strip -%}
-{%- assign exposure = page.focal_length | append: " " | append: page.aperture | append: " " | append: page.shutter -%}
-{%- if iso != "" %}{% assign exposure = exposure | append: " ISO " | append: iso %}{% endif -%}
-{%- assign exposure = exposure | strip | normalize_whitespace -%}
+{%- if iso != "" %}{% assign iso = "ISO " | append: iso %}{% endif -%}
+{%- assign fields = "" | split: "" | push: page.camera | push: page.lens | push: page.aperture | push: page.shutter | push: iso -%}
+{%- assign when = "" -%}
+{%- if page.captured_at and page.captured_at != "" %}{% assign when = page.captured_at | date: "%B" %}{% endif -%}
+{%- assign where = page.place | append: "" | strip -%}
+{%- if when != "" and where != "" %}{% assign when = when | append: " in " | append: where %}{% elsif where != "" %}{% assign when = where %}{% endif -%}
+{%- assign fields = fields | push: when -%}
 {%- assign parts = "" | split: "" -%}
-{%- if place != "" %}{% assign parts = parts | push: place %}{% endif -%}
-{%- if camera != "" %}{% assign parts = parts | push: camera %}{% endif -%}
-{%- if lens != "" %}{% assign parts = parts | push: lens %}{% endif -%}
-{%- if exposure != "" %}{% assign parts = parts | push: exposure %}{% endif -%}
+{%- for f in fields %}{% assign v = f | append: "" | strip %}{% if v != "" %}{% assign parts = parts | push: v %}{% endif %}{% endfor -%}
 {%- assign states = "folded,open" | split: "," -%}
 {%- comment -%}
 Caption state lives in the URL fragment (#open = caption shown, anything else = hidden;
@@ -43,7 +42,7 @@ CSS shows one copy.
   </div>
   <figcaption>
     {%- if note != "" %}<p class="note">{{ note }}</p>{% endif %}
-    {%- if parts.size > 0 %}<p class="meta">{{ parts | join: " · " }}</p>{% endif %}
+    {%- if parts.size > 0 %}<p class="meta">{{ parts | join: " - " }}</p>{% endif %}
     {%- assign body = content | strip %}
     {%- if body != "" %}<div class="comment">{{ body }}</div>{% endif %}
   </figcaption>

@@ -1,5 +1,3 @@
-// Optional: arrow keys and horizontal swipe follow the visible prev/next link
-// (the copy for the current caption state, see photo.html); Escape goes up to the series.
 (function () {
   function link(sel) {
     return [].find.call(document.querySelectorAll(sel), function (a) {

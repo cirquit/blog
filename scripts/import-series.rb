@@ -62,7 +62,8 @@ images.each do |file|
   w, h = `magick identify -format "%w %h" #{full}`.split.map(&:to_f)
   e = exif(src)
   shutter = e["ExposureTime"] && (e["ExposureTime"] < 1 ? "1/#{(1 / e["ExposureTime"]).round}" : e["ExposureTime"].to_s)
-  focal = e["FocalLength"] && "#{e["FocalLength"].to_s.sub(/\.0\z/, "")} mm"
+  lens = (e["LensModel"] || e["LensID"]).to_s[/\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)?mm/i]&.downcase
+  aperture = e["FNumber"] && "f/#{e["FNumber"].to_f.round(1).to_s.sub(/\.0\z/, "")}"
   taken = (e["DateTimeOriginal"] || e["CreateDate"])&.sub(/\A(\d+):(\d+):(\d+)/, '\1-\2-\3')
 
   File.write(md, <<~MD)
@@ -73,14 +74,13 @@ images.each do |file|
     ratio: #{(w / h).round(3)}
     alt: ""
     note: ""
-    place: ""
     camera: #{q(e["Model"])}
-    lens: #{q(e["LensModel"] || e["LensID"])}
-    focal_length: #{q(focal)}
-    aperture: #{q(e["FNumber"] && "f/#{e["FNumber"]}")}
+    lens: #{q(lens)}
+    aperture: #{q(aperture)}
     shutter: #{q(shutter)}
     iso: #{q(e["ISO"])}
     captured_at: #{q(taken)}
+    place: ""
     ---
   MD
   puts "wrote  _photos/#{slug}/#{nn}.md  (+ #{nn}-full.webp, #{nn}-thumb.webp)"
