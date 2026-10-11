@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Turn a folder of original photos into a series: web-sized + thumbnail WebP in
+# Turn a folder of original photos into a series: full, medium (phones) and thumbnail WebP in
 # assets/photos/<slug>/, one editable stub per photo in _photos/<slug>/, and
 # _series/<slug>.md if missing. Originals are only read. Never overwrites;
 # running again on more photos continues the numbering.
@@ -18,6 +18,7 @@ require "open3"
 ROOT = File.expand_path("..", __dir__)
 EXTS = %w[.jpg .jpeg .png .tif .tiff .webp].freeze
 FULL = ["-resize", "2400x2400>", "-quality", "82"].freeze
+MEDIUM = ["-resize", "1200x1200>", "-quality", "82"].freeze
 THUMB = ["-resize", "640x640>", "-quality", "75"].freeze
 
 def which?(cmd) = system("which #{cmd} > /dev/null 2>&1")
@@ -52,12 +53,14 @@ n = Dir.children(photos).filter_map { |f| f[/\A(\d+)\.md\z/, 1]&.to_i }.max || 0
 images.each do |file|
   nn = format("%02d", n += 1)
   full = File.join(assets, "#{nn}-full.webp")
+  medium = File.join(assets, "#{nn}-medium.webp")
   thumb = File.join(assets, "#{nn}-thumb.webp")
   md = File.join(photos, "#{nn}.md")
-  next puts("skip   #{nn} (exists)") if [full, thumb, md].any? { |p| File.exist?(p) }
+  next puts("skip   #{nn} (exists)") if [full, medium, thumb, md].any? { |p| File.exist?(p) }
 
   src = File.join(dir, file)
   convert(src, full, FULL)
+  convert(src, medium, MEDIUM)
   convert(src, thumb, THUMB)
   w, h = `magick identify -format "%w %h" #{full}`.split.map(&:to_f)
   e = exif(src)
@@ -70,6 +73,7 @@ images.each do |file|
     ---
     series: #{slug}
     image: /assets/photos/#{slug}/#{nn}-full.webp
+    medium: /assets/photos/#{slug}/#{nn}-medium.webp
     thumb: /assets/photos/#{slug}/#{nn}-thumb.webp
     ratio: #{(w / h).round(3)}
     alt: ""
@@ -83,7 +87,7 @@ images.each do |file|
     place: ""
     ---
   MD
-  puts "wrote  _photos/#{slug}/#{nn}.md  (+ #{nn}-full.webp, #{nn}-thumb.webp)"
+  puts "wrote  _photos/#{slug}/#{nn}.md  (+ #{nn}-full.webp, #{nn}-medium.webp, #{nn}-thumb.webp)"
 end
 
 series = File.join(ROOT, "_series", "#{slug}.md")

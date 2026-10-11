@@ -20,7 +20,7 @@ mise exec -- bundle exec ruby scripts/import-series.rb <slug> <dir-with-original
 ```
 
 Needs ImageMagick (`brew install imagemagick`). Originals are only read, so they
-can live anywhere. For each photo it writes a web-sized and a thumbnail WebP to
+can live anywhere. For each photo it writes a full (2400px), a medium (1200px, used by phones) and a thumbnail WebP to
 `assets/photos/<slug>/` and a stub `_photos/<slug>/NN.md`, plus `_series/<slug>.md`
 the first time. Nothing is overwritten; running again with new photos continues the numbering.
 
@@ -28,7 +28,7 @@ Then edit by hand:
 
 - `_series/<slug>.md`: `title`, `description`, `cover` (which photo is the cover), and any text below the front matter.
 - `_photos/<slug>/NN.md`: `alt`, `note` (shown under the photo), and the caption fields `camera`, `lens` (focal range, e.g. `16-300mm`), `aperture`, `shutter`, `iso`, plus `place` (city; shown as "Month in place" with the month from `captured_at`). Text below the front matter is shown as a comment. Empty fields are skipped.
-- Photos appear in filename order. Delete a photo by removing its `.md` and its two images.
+- Photos appear in filename order. Delete a photo by removing its `.md` and its three images.
 
 ## Add a post
 

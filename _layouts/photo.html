@@ -20,6 +20,15 @@ layout: default
 {%- assign fields = fields | push: when -%}
 {%- assign parts = "" | split: "" -%}
 {%- for f in fields %}{% assign v = f | append: "" | strip %}{% if v != "" %}{% assign parts = parts | push: v %}{% endif %}{% endfor -%}
+{%- comment -%} phones get the 1200px "medium" file when present; sizes = the photo's on-screen width (fits 100vw x 100vh) {%- endcomment -%}
+{%- capture img_attrs -%}
+src="{{ page.image | relative_url }}"{% if page.medium %} srcset="{{ page.medium | relative_url }} 1200w, {{ page.image | relative_url }} 2400w" sizes="min(100vw, {{ page.ratio | default: 1.5 | times: 100 }}vh)"{% endif %}
+{%- endcapture -%}
+{%- if next -%}
+{%- capture next_img_attrs -%}
+src="{{ next.image | relative_url }}"{% if next.medium %} srcset="{{ next.medium | relative_url }} 1200w, {{ next.image | relative_url }} 2400w" sizes="min(100vw, {{ next.ratio | default: 1.5 | times: 100 }}vh)"{% endif %}
+{%- endcapture -%}
+{%- endif -%}
 {%- assign states = "folded,open" | split: "," -%}
 {%- comment -%}
 Caption state lives in the URL fragment (#open = caption shown, anything else = hidden;
@@ -37,8 +46,8 @@ CSS shows one copy.
 <figure class="photo" style="--ratio: {{ page.ratio | default: 1.5 }}">
   <div class="stage">
     {%- comment -%} the photo sits inside the toggle link, so right-click / long-press still offers to save the image {%- endcomment %}
-    <div class="s s-folded"><a class="toggle" href="#open" aria-label="Show caption"><img src="{{ page.image | relative_url }}" alt="{{ page.alt }}"></a></div>
-    <div class="s s-open"><a class="toggle" href="{{ page.url | relative_url }}" aria-label="Hide caption"><img src="{{ page.image | relative_url }}" alt="{{ page.alt }}"></a></div>
+    <div class="s s-folded"><a class="toggle" href="#open" aria-label="Show caption"><img {{ img_attrs }} alt="{{ page.alt }}"></a></div>
+    <div class="s s-open"><a class="toggle" href="{{ page.url | relative_url }}" aria-label="Hide caption"><img {{ img_attrs }} alt="{{ page.alt }}"></a></div>
   </div>
   <figcaption>
     {%- if note != "" %}<p class="note">{{ note }}</p>{% endif %}
@@ -56,4 +65,9 @@ CSS shows one copy.
   </nav>
 </div>
 {%- endfor %}
+{%- comment -%} prefetch: the next photo loads at low priority in the background, so paging is instant {%- endcomment -%}
+{%- if next %}
+<link rel="prefetch" href="{{ next.url | relative_url }}">
+<img class="prefetch" {{ next_img_attrs }} alt="" hidden fetchpriority="low" decoding="async">
+{%- endif %}
 <a class="close" href="{{ gal.url | default: '/series/' | relative_url }}" aria-label="Back to series">×</a>
