@@ -32,8 +32,8 @@ Then edit by hand:
 
 ## Add a post
 
-Copy `_drafts/template.md` to `_posts/YYYY-MM-DD-slug.md`, set `title` and `date`, write Markdown.
-`_drafts/` never publishes; preview a draft with `--drafts`.
+Copy `_templates/post.md` to `_posts/YYYY-MM-DD-slug.md`, set `title` and `date`, write Markdown.
+Work in progress can live in `_drafts/` (never published; the preview shows it via `--drafts`).
 
 ## Publish
 

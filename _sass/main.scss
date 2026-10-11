@@ -70,19 +70,21 @@ article > header { margin-bottom: 2rem; }
 
 // Series
 .series-head { margin: 0 0 2.5rem; .lede { margin: 1rem 0 0; } }
-.grid {
-  display: grid; gap: .75rem;
-  grid-template-columns: repeat(2, 1fr);
-  @media (min-width: 40rem) { grid-template-columns: repeat(3, 1fr); }
-  @media (min-width: 60rem) { grid-template-columns: repeat(4, 1fr); }
-  img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
-}
-.grid.series {
-  gap: 2rem 1.25rem;
-  a { text-decoration: none; }
-  .g-title { display: block; margin-top: .5rem; font-weight: 600; }
-  .g-title + .meta { margin-top: 0; }
-  a .meta { display: block; }
+// Series index: one series per row, cover in a fixed square box (fit, not cropped,
+// pushed against the text), text on the right. Stacks on narrow screens.
+.series-list {
+  --cover: 10rem;
+  list-style: none; margin: 0; padding: 0;
+  li + li { margin-top: 2rem; }
+  a { display: flex; align-items: center; gap: 1.25rem; text-decoration: none; }
+  .cover { flex: 0 0 var(--cover); height: var(--cover); display: flex; justify-content: flex-end; align-items: center; }
+  .cover img { width: min(100%, calc(var(--cover) * var(--ratio))); height: auto; aspect-ratio: var(--ratio); }
+  .title { display: block; font-weight: 600; }
+  .meta { display: block; }
+  @media (max-width: 30rem) {
+    a { flex-direction: column; align-items: flex-start; gap: .5rem; }
+    .cover { justify-content: flex-start; }
+  }
 }
 
 // Sizing model: a picture is a box of height × --ratio (width / height, set

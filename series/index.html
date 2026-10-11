@@ -2,16 +2,22 @@
 layout: default
 title: Series
 ---
-<div class="grid series">
+<ul class="series-list">
   {%- assign series = site.series | sort: "date" | reverse %}
   {%- for g in series %}
   {%- assign photos = site.photos | where: "series", g.slug | sort: "path" %}
   {%- assign cover_path = "_photos/" | append: g.slug | append: "/" | append: g.cover | append: ".md" %}
   {%- assign cover = photos | where: "path", cover_path | first | default: photos.first %}
-  <a href="{{ g.url | relative_url }}">
-    {%- if cover %}<img src="{{ cover.thumb | default: cover.image | relative_url }}" alt="" loading="lazy">{% endif %}
-    <span class="g-title">{{ g.title }}</span>
-    <span class="meta">{{ g.date | date: "%B %Y" }} · {{ photos.size }} photo{% if photos.size != 1 %}s{% endif %}</span>
-  </a>
+  <li>
+    <a href="{{ g.url | relative_url }}">
+      <span class="cover">
+        {%- if cover %}<img src="{{ cover.thumb | default: cover.image | relative_url }}" alt="" loading="lazy" style="--ratio: {{ cover.ratio | default: 1.5 }}">{% endif -%}
+      </span>
+      <span>
+        <span class="title">{{ g.title }}</span>
+        <span class="meta">{{ g.date | date: "%B %Y" }} · {{ photos.size }} photo{% if photos.size != 1 %}s{% endif %}</span>
+      </span>
+    </a>
+  </li>
   {%- endfor %}
-</div>
+</ul>
