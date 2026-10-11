@@ -10,7 +10,7 @@ Ruby is pinned by [mise](https://mise.jdx.dev/); gems install into `vendor/bundl
 mise install                                                          # once
 mise exec -- bundle config set --local path vendor/bundle && mise exec -- bundle install   # once
 mise exec -- bundle exec jekyll serve --drafts --livereload
-# http://localhost:4000/blog/
+# http://localhost:4000/
 ```
 
 ## Add photos
@@ -37,5 +37,5 @@ Work in progress can live in `_drafts/` (never published; the preview shows it v
 
 ## Publish
 
-Push to `main`; the GitHub Action builds and deploys to `https://cirquit.github.io/blog/`
+Push to `main`; the GitHub Action builds and deploys to `https://aerben.me/`
 (Settings → Pages → Source: GitHub Actions, once).

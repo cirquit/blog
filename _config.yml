@@ -5,8 +5,8 @@ author:
   email:        ""
   url:          ""
 
-url:            "https://cirquit.github.io"
-baseurl:        "/blog"
+url:            "https://aerben.me"
+baseurl:        ""
 
 markdown:       kramdown
 permalink:      /writing/:title
