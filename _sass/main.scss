@@ -47,6 +47,7 @@ h3 { font-size: 1.1rem; margin: 1.8rem 0 .4rem; }
 }
 
 img { max-width: 100%; height: auto; display: block; }
+[hidden] { display: none !important; }  // the rule above would otherwise unhide <img hidden>
 blockquote { margin: 1.5rem 0; padding-left: 1rem; border-left: 2px solid rgba(0, 0, 0, .15); color: $grey; }
 hr { border: 0; border-top: 1px solid rgba(0, 0, 0, .12); margin: 2.5rem 0; }
 
