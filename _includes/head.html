@@ -33,9 +33,18 @@
     {{ "@import 'main';" | scssify }}
   </style>
 
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ "/assets/favicon-32x32.png" | relative_url }}">
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ "/assets/favicon-16x16.png" | relative_url }}">
-  <link rel="apple-touch-icon" sizes="180x180" href="{{ "/assets/apple-touch-icon.png" | relative_url }}">
+  {%- comment -%} favicon: C on the landing page, A for writing, B for series {%- endcomment -%}
+  {%- if page.url == "/" -%}
+    {%- assign favicon_dir = "/assets/favicons/design-C" -%}
+  {%- elsif page.url contains "/series/" -%}
+    {%- assign favicon_dir = "/assets/favicons/design-B" -%}
+  {%- else -%}
+    {%- assign favicon_dir = "/assets/favicons/design-A" -%}
+  {%- endif %}
+  <link rel="icon" type="image/svg+xml" href="{{ favicon_dir | append: "/favicon.svg" | relative_url }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ favicon_dir | append: "/favicon-32x32.png" | relative_url }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ favicon_dir | append: "/favicon-16x16.png" | relative_url }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ favicon_dir | append: "/apple-touch-icon.png" | relative_url }}">
 
   {% feed_meta %}
 </head>
