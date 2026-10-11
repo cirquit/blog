@@ -72,7 +72,7 @@ article > header { margin-bottom: 2rem; }
 // Series
 .series-head { margin: 0 0 2.5rem; .lede { margin: 1rem 0 0; } }
 // Series index: one series per row, cover in a fixed square box (fit, not cropped,
-// pushed against the text), text on the right. Stacks on narrow screens.
+// pushed against the text), text on the right. Smaller cover on narrow screens.
 .series-list {
   --cover: 10rem;
   list-style: none; margin: 0; padding: 0;
@@ -83,8 +83,8 @@ article > header { margin-bottom: 2rem; }
   .title { display: block; font-weight: 600; }
   .meta { display: block; }
   @media (max-width: 30rem) {
-    a { flex-direction: column; align-items: flex-start; gap: .5rem; }
-    .cover { justify-content: flex-start; }
+    --cover: 7rem;
+    a { gap: 1rem; }
   }
 }
 
