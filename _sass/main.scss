@@ -133,7 +133,7 @@ article > header { margin-bottom: 2rem; }
   position: relative;
   img { display: block; width: 100%; height: auto; aspect-ratio: var(--ratio); object-fit: contain; }
 }
-.toggle { position: absolute; inset: 0; cursor: pointer; pointer-events: auto; }
+.toggle { display: block; cursor: pointer; pointer-events: auto; }
 
 // Fixed height, so the photo never resizes with the caption; long text scrolls.
 .photo figcaption {

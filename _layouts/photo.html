@@ -36,9 +36,9 @@ CSS shows one copy.
 {%- endfor %}
 <figure class="photo" style="--ratio: {{ page.ratio | default: 1.5 }}">
   <div class="stage">
-    <img src="{{ page.image | relative_url }}" alt="{{ page.alt }}">
-    <div class="s s-folded"><a class="toggle" href="#open" aria-label="Show caption"></a></div>
-    <div class="s s-open"><a class="toggle" href="{{ page.url | relative_url }}" aria-label="Hide caption"></a></div>
+    {%- comment -%} the photo sits inside the toggle link, so right-click / long-press still offers to save the image {%- endcomment %}
+    <div class="s s-folded"><a class="toggle" href="#open" aria-label="Show caption"><img src="{{ page.image | relative_url }}" alt="{{ page.alt }}"></a></div>
+    <div class="s s-open"><a class="toggle" href="{{ page.url | relative_url }}" aria-label="Hide caption"><img src="{{ page.image | relative_url }}" alt="{{ page.alt }}"></a></div>
   </div>
   <figcaption>
     {%- if note != "" %}<p class="note">{{ note }}</p>{% endif %}
