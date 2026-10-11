@@ -24,9 +24,10 @@ layout: default
 {%- capture img_attrs -%}
 src="{{ page.image | relative_url }}"{% if page.medium %} srcset="{{ page.medium | relative_url }} 1200w, {{ page.image | relative_url }} 2400w" sizes="min(100vw, {{ page.ratio | default: 1.5 | times: 100 }}vh)"{% endif %}
 {%- endcapture -%}
+{%- comment -%} the next photo, for photo-nav.js to prefetch: same src / srcset / sizes as on its own page {%- endcomment -%}
 {%- if next -%}
-{%- capture next_img_attrs -%}
-src="{{ next.image | relative_url }}"{% if next.medium %} srcset="{{ next.medium | relative_url }} 1200w, {{ next.image | relative_url }} 2400w" sizes="min(100vw, {{ next.ratio | default: 1.5 | times: 100 }}vh)"{% endif %}
+{%- capture next_attrs -%}
+data-next-src="{{ next.image | relative_url }}"{% if next.medium %} data-next-srcset="{{ next.medium | relative_url }} 1200w, {{ next.image | relative_url }} 2400w" data-next-sizes="min(100vw, {{ next.ratio | default: 1.5 | times: 100 }}vh)"{% endif %}
 {%- endcapture -%}
 {%- endif -%}
 {%- assign states = "folded,open" | split: "," -%}
@@ -43,7 +44,7 @@ CSS shows one copy.
   {%- if next %}<a class="zone next" href="{{ next.url | relative_url }}{{ hash }}" rel="next" aria-label="Next photo"></a>{% endif %}
 </div>
 {%- endfor %}
-<figure class="photo" style="--ratio: {{ page.ratio | default: 1.5 }}">
+<figure class="photo" style="--ratio: {{ page.ratio | default: 1.5 }}" {{ next_attrs }}>
   <div class="stage">
     {%- comment -%} the photo sits inside the toggle link, so right-click / long-press still offers to save the image {%- endcomment %}
     <div class="s s-folded"><a class="toggle" href="#open" aria-label="Show caption"><img {{ img_attrs }} alt="{{ page.alt }}"></a></div>
@@ -65,9 +66,4 @@ CSS shows one copy.
   </nav>
 </div>
 {%- endfor %}
-{%- comment -%} prefetch: the next photo loads at low priority in the background, so paging is instant {%- endcomment -%}
-{%- if next %}
-<link rel="prefetch" href="{{ next.url | relative_url }}">
-<img class="prefetch" {{ next_img_attrs }} alt="" hidden fetchpriority="low" decoding="async">
-{%- endif %}
 <a class="close" href="{{ gal.url | default: '/series/' | relative_url }}" aria-label="Back to series">×</a>
